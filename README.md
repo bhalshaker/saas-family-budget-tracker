@@ -33,6 +33,7 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 | GET    | /families/{family_id}/users                | List users in a family               |
 | POST   | /families/{family_id}/users                | Add a user to a family               |
 | DELETE | /families/{family_id}/users/{user_id}      | Remove a user from a family          |
+| GET    | /users/{user_id}/families    | Retrieve families a user belongs to       |
 
 ### 👤 Users
 | Method | Route               | Description                    |
@@ -46,8 +47,8 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 💼 Accounts
 | Method | Route                     | Description                 |
 |--------|---------------------------|-----------------------------|
-| GET    | /accounts                 | List all accounts           |
-| POST   | /accounts                 | Create a new account        |
+| GET    | /families/{family_id}/accounts                 | List all accounts belongs to a family          |
+| POST   | /families/{family_id}/accounts                 | Create a new account for a family     |
 | GET    | /accounts/{account_id}    | Retrieve a specific account |
 | PUT    | /accounts/{account_id}    | Update an account           |
 | DELETE | /accounts/{account_id}    | Delete an account           |
@@ -55,8 +56,8 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 🏷️ Categories
 | Method | Route                       | Description                   |
 |--------|-----------------------------|-------------------------------|
-| GET    | /categories                 | List all categories           |
-| POST   | /categories                 | Create a new category         |
+| GET    | /families/{family_id}/categories                 | List all categories           |
+| POST   | /families/{family_id}/categories                 | Create a new category         |
 | GET    | /categories/{category_id}   | Retrieve a specific category  |
 | PUT    | /categories/{category_id}   | Update a category             |
 | DELETE | /categories/{category_id}   | Delete a category             |
@@ -64,8 +65,8 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 💸 Transactions
 | Method | Route                          | Description                      |
 |--------|--------------------------------|----------------------------------|
-| GET    | /transactions                  | List all transactions            |
-| POST   | /transactions                  | Create a new transaction         |
+| GET    | /families/{family_id}/transactions                  | List all transactions            |
+| POST   | /families/{family_id}/transactions                  | Create a new transaction         |
 | GET    | /transactions/{transaction_id} | Retrieve a specific transaction  |
 | PUT    | /transactions/{transaction_id} | Update a transaction             |
 | DELETE | /transactions/{transaction_id} | Delete a transaction             |
@@ -73,16 +74,16 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 📎 Attachments
 | Method | Route                          | Description                      |
 |--------|--------------------------------|----------------------------------|
-| GET    | /attachments                   | List all attachments             |
-| POST   | /attachments                   | Upload a new attachment          |
+| GET    | /transactions/{transaction_id}/attachments                   | List all attachments             |
+| POST   | /transactions/{transaction_id}/attachments                   | Upload a new attachment          |
 | GET    | /attachments/{attachment_id}   | Retrieve a specific attachment   |
 | DELETE | /attachments/{attachment_id}   | Delete an attachment             |
 
 ### 📊 Budgets
 | Method | Route                    | Description                |
 |--------|--------------------------|----------------------------|
-| GET    | /budgets                 | List all budgets           |
-| POST   | /budgets                 | Create a new budget        |
+| GET    | /families/{family_id}/budgets                 | List all budgets           |
+| POST   | /families/{family_id}/budgets                 | Create a new budget        |
 | GET    | /budgets/{budget_id}     | Retrieve a specific budget |
 | PUT    | /budgets/{budget_id}     | Update a budget            |
 | DELETE | /budgets/{budget_id}     | Delete a budget            |
@@ -90,8 +91,8 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 🎯 Goals
 | Method | Route                  | Description              |
 |--------|------------------------|--------------------------|
-| GET    | /goals                 | List all goals           |
-| POST   | /goals                 | Create a new goal        |
+| GET    | /families/{family_id}/goals                 | List all goals           |
+| POST   | /families/{family_id}/goals                 | Create a new goal        |
 | GET    | /goals/{goal_id}       | Retrieve a specific goal |
 | PUT    | /goals/{goal_id}       | Update a goal            |
 | DELETE | /goals/{goal_id}       | Delete a goal            |
@@ -99,8 +100,8 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 🔁 Budget Transactions
 | Method | Route                                                   | Description                          |
 |--------|----------------------------------------------------------|--------------------------------------|
-| GET    | /budgettransactions                                      | List all budget-transaction mappings |
-| POST   | /budgettransactions                                      | Link a transaction to a budget       |
+| GET    | /families/{family_id}/budgettransactions                                      | List all budget-transaction mappings |
+| POST   | /families/{family_id}/budgettransactions                                      | Link a transaction to a budget       |
 | GET    | /budgettransactions/{budget_id}/{transaction_id}         | Get a specific mapping               |
 | DELETE | /budgettransactions/{budget_id}/{transaction_id}         | Remove a transaction from a budget   |
 
