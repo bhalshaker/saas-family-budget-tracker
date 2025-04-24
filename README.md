@@ -4,7 +4,7 @@
 
 The **Multi-Family Budget Tracking Application** is a simple secure and collaborative financial management tool that allows multiple families to independently track their budgets, expenses, goals, and transactions. With built-in support for multi-tenancy, each family’s data is isolated and confidential.
 
-Users can create accounts, categorize transactions, assign budgets, and track savings goals. The system features a flexible many-to-many relationship between families and users, enabling shared access across households with role-based permissions.
+Users can create accounts, categorize transactions, assign budgets, and track savings goals. This RestFull API system features a flexible many-to-many relationship between families and users, enabling shared access across households with role-based permissions.
 
 Designed with a RESTful API structure, the application supports integration with web and mobile interfaces, empowering families to plan and manage their finances together — with clarity, control, and transparency.
 
@@ -13,7 +13,7 @@ Designed with a RESTful API structure, the application supports integration with
 
 The following ERD outlines the data structure for the Multi-Family Budget Tracking Application. It defines how core entities such as Families, Users, Transactions, Accounts, Budgets, Goals, and Attachments are related. This schema supports multi-tenancy and ensures data isolation between families while enabling collaborative financial management within each household.
 
-
+![Family Budget Tracker ERD](/images/multi_family_budget_erd_many_to_many.png)
 
 
 ## 🌐 API Routes for Family Budget Tracker
@@ -96,7 +96,7 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 | PUT    | /goals/{goal_id}       | Update a goal            |
 | DELETE | /goals/{goal_id}       | Delete a goal            |
 
-### 🔁 Budget Transactions (Hybrid Model)
+### 🔁 Budget Transactions
 | Method | Route                                                   | Description                          |
 |--------|----------------------------------------------------------|--------------------------------------|
 | GET    | /budgettransactions                                      | List all budget-transaction mappings |
