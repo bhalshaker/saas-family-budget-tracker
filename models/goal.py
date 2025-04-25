@@ -1,7 +1,7 @@
 from sqlalchemy import Column,String,Numeric,DateTime,UUID,ForeignKey
 from .base import BaseModel
 
-class Goal(BaseModel):
+class GoalModel(BaseModel):
     __tablename__ = "goals"
     user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)

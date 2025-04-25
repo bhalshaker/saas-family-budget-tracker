@@ -1,6 +1,6 @@
 from sqlalchemy import Column,Numeric,DateTime,UUID,ForeignKey
 from .base import BaseModel
-class Budget(BaseModel):
+class BudgetModel(BaseModel):
     __tablename__ = "budgets"
     user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)

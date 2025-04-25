@@ -9,7 +9,7 @@ class Role(enum.Enum):
     GUEST = "guest"
         
 
-class FamilyUser(BaseModel):
+class FamilyUserModel(BaseModel):
     __tablename__ = "families_users"
     user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)
