@@ -1,4 +1,5 @@
 from sqlalchemy import Column,String,Numeric,DateTime,UUID,ForeignKey
+from sqlalchemy.orm import relationship
 from .base import BaseModel
 class TransactionModel(BaseModel):
     __tablename__ = "transactions"
@@ -11,3 +12,8 @@ class TransactionModel(BaseModel):
     date=Column(DateTime(),nullable=False)
     description=Column(String(),nullable=True)
     #transaction_type TODO: Evaluate whether this has to be defined in table or Enum
+    attachment=relationship('AttachmentModel',back_populates='transaction',uselist=False)
+    user=relationship('UserModel',back_populates='transaction')
+    family=relationship('FamilyModel',back_populates='transaction')
+    account=relationship('AccountModel',back_populates='transaction')
+    category=relationship('CategoryModel',back_populates='transaction')
