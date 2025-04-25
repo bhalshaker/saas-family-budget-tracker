@@ -1,4 +1,5 @@
 from sqlalchemy import Column,Numeric,DateTime,UUID,ForeignKey
+from sqlalchemy.orm import relationship
 from .base import BaseModel
 class BudgetModel(BaseModel):
     __tablename__ = "budgets"
@@ -10,3 +11,7 @@ class BudgetModel(BaseModel):
     start_date=Column(DateTime(),nullable=False)
     end_date=Column(DateTime(),nullable=False)
     #transaction_type TODO: Evaluate whether this has to be defined in table or Enum
+    user=relationship('UserModel',back_populates='budget')
+    family=relationship('FamilyModel',back_populates='budget')
+    category=relationship('CategoryModel',back_populates='budget')
+    transactions=relationship('BudgetTransactionModel',back_populates='budgets')

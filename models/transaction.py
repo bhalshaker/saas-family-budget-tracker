@@ -17,3 +17,4 @@ class TransactionModel(BaseModel):
     family=relationship('FamilyModel',back_populates='transaction')
     account=relationship('AccountModel',back_populates='transaction')
     category=relationship('CategoryModel',back_populates='transaction')
+    budgets=relationship('BudgetTransactionModel',back_populates='transaction')

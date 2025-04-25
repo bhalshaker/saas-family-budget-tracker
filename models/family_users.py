@@ -1,4 +1,5 @@
 from sqlalchemy import Column,Enum,DateTime,func,UUID,ForeignKey
+from sqlalchemy.orm import relationship
 from .base import BaseModel
 import enum
 
@@ -15,3 +16,5 @@ class FamilyUserModel(BaseModel):
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)
     role = Column(Enum(Role, name="role_enum", native_enum=True),nullable=False)
     joined_at=Column(DateTime, default=func.now())
+    user=relationship('UserModel',back_populates='families')
+    family=relationship('FamilyModel',back_populates='users')

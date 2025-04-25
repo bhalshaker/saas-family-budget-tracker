@@ -1,4 +1,5 @@
 from sqlalchemy import Column,String,Numeric,DateTime,UUID,ForeignKey
+from sqlalchemy.orm import relationship
 from .base import BaseModel
 
 class GoalModel(BaseModel):
@@ -9,3 +10,5 @@ class GoalModel(BaseModel):
     target_amount=Column(Numeric(scale=3),nullable=True)
     saved_amount=Column(Numeric(scale=3),nullable=True)
     due_date=Column(DateTime(),nullable=True)
+    user=relationship('UserModel',back_populates='goal')
+    family=relationship('FamilyModel',back_populates='goal')
