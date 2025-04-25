@@ -13,7 +13,7 @@ Designed with a RESTful API structure, the application supports integration with
 
 The following ERD outlines the data structure for the Multi-Family Budget Tracking Application. It defines how core entities such as Families, Users, Transactions, Accounts, Budgets, Goals, and Attachments are related. This schema supports multi-tenancy and ensures data isolation between families while enabling collaborative financial management within each household.
 
-![Family Budget Tracker ERD](/images/multi_family_budget_erd_many_to_many.png)
+![Family Budget Tracker ERD](/images/multi_family_budget_erd.png)
 
 
 ## 🌐 API Routes for Family Budget Tracker
