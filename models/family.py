@@ -11,4 +11,3 @@ class FamilyModel(BaseModel):
     category=relationship('CategoryModel',back_populates='family')
     goal=relationship('GoalModel',back_populates='family')
     budget=relationship('BudgetModel',back_populates='family')
-    #TODO: Add currency column

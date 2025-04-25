@@ -2,7 +2,8 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy.orm import declarative_base 
-from sqlalchemy import Column, DateTime, Integer, func,UUID
+from sqlalchemy import Column, DateTime, Integer, func,UUID,Enum
+from enum import Enum
 
 Base= declarative_base()
 
@@ -18,3 +19,8 @@ class BaseModel(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     created_at = Column(DateTime, default=func.now())
     modified_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+class EntryType(Enum):
+    INCOME = "income"
+    EXPENSE = "expense"
+    TRANSFER = "transfer"
