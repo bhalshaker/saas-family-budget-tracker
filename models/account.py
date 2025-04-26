@@ -29,3 +29,4 @@ class AccountModel(BaseModel):
     type= Column(Enum(AccountType, name="account_type", native_enum=True),nullable=False)
     user=relationship('UserModel',back_populates='category')
     family=relationship('FamilyModel',back_populates='category')
+    budget=relationship('BudgetModel',back_populates='category')

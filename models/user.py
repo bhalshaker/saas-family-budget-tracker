@@ -28,3 +28,4 @@ class UserModel(BaseModel):
     category=relationship('CategoryModel',back_populates='user')
     goal=relationship('GoalModel',back_populates='user')
     budget=relationship('BudgetModel',back_populates='user')
+    account=relationship('AccountModel',back_populates='user')
