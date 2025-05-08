@@ -2,6 +2,7 @@ from .base import BaseModel,EntryType,Base
 from .user import UserModel
 from .family import FamilyModel
 from .account import AccountModel,AccountType
+from .transaction import TransactionModel
 from .attachement import AttachementModel
 from .budget_transaction import BudgetTransactionModel
 from .budget import BudgetModel
