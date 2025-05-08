@@ -19,9 +19,9 @@ class BudgetModel(BaseModel):
     """
 
     __tablename__ = "budgets"
-    user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)
-    category_id=Column(UUID(as_uuid=True), ForeignKey('categories.id'), nullable=False)
+    user_id=Column(UUID(as_uuid=True), ForeignKey('users.id',deferrable=True), nullable=False)
+    family_id=Column(UUID(as_uuid=True), ForeignKey('families.id',deferrable=True), nullable=False)
+    category_id=Column(UUID(as_uuid=True), ForeignKey('categories.id',deferrable=True), nullable=False)
     amount=Column(Numeric(scale=3),nullable=False)
     start_date=Column(DateTime(),nullable=False)
     end_date=Column(DateTime(),nullable=False)
