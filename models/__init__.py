@@ -1,4 +1,4 @@
-from .base import BaseModel,EntryType
+from .base import BaseModel,EntryType,Base
 from .user import UserModel
 from .family import FamilyModel
 from .account import AccountModel,AccountType

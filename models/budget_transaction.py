@@ -19,7 +19,7 @@ class BudgetTransactionModel(BaseModel):
             representing the budget associated with this transaction.
     """
 
-    __tablename__ = "attachments"
+    __tablename__ = "budgets_transactions"
     budget_id=Column(UUID(as_uuid=True), ForeignKey('budgets.id'), nullable=False)
     transaction_id=Column(UUID(as_uuid=True), ForeignKey('transactions.id'), nullable=False)
     assigned_amount=Column(Numeric(scale=3),nullable=False)

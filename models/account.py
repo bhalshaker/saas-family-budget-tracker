@@ -1,4 +1,4 @@
-from sqlalchemy import Column,ForeignKey,UUID,String
+from sqlalchemy import Column,ForeignKey,UUID,String,Enum as EnumSQL
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 from enum import Enum
@@ -22,11 +22,11 @@ class AccountModel(BaseModel):
         family (FamilyModel): Relationship to the FamilyModel, representing the family associated with the account.
     """
 
-    __tablename__ = "categories"
+    __tablename__ = "accounts"
     user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)
     name = Column(String, nullable=False)
-    type= Column(Enum(AccountType, name="account_type", native_enum=True),nullable=False)
+    type= Column(EnumSQL(AccountType, name="account_type", native_enum=True),nullable=False)
     user=relationship('UserModel',back_populates='category')
     family=relationship('FamilyModel',back_populates='category')
     budget=relationship('BudgetModel',back_populates='category')

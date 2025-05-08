@@ -1,4 +1,4 @@
-from sqlalchemy import Column,String,Numeric,DateTime,UUID,ForeignKey,Enum,func
+from sqlalchemy import Column,String,Numeric,DateTime,UUID,ForeignKey,Enum as EnumSQL,func
 from sqlalchemy.orm import relationship
 from .base import BaseModel,EntryType
 class TransactionModel(BaseModel):
@@ -30,7 +30,7 @@ class TransactionModel(BaseModel):
     amount=Column(Numeric(scale=3),nullable=False)
     date=Column(DateTime(),default=func.now(),nullable=False)
     description=Column(String(),nullable=True)
-    transaction_type=Column(Enum(EntryType, name="entry_type", native_enum=True),nullable=False)
+    transaction_type=Column(EnumSQL(EntryType, name="entry_type", native_enum=True),nullable=False)
     attachment=relationship('AttachmentModel',back_populates='transaction',uselist=False)
     user=relationship('UserModel',back_populates='transaction')
     family=relationship('FamilyModel',back_populates='transaction')
