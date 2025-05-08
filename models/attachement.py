@@ -16,7 +16,7 @@ class AttachementModel(BaseModel):
     """
     
     __tablename__ = "attachments"
-    transaction_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
+    transaction_id=Column(UUID(as_uuid=True), ForeignKey('users.id',deferrable=True), nullable=False)
     file_content = Column(LargeBinary, nullable=False)
     upload_date=Column(DateTime(),default=func.now(),nullable=False)
     transaction=relationship('TransactionModel',back_populates='attachment')

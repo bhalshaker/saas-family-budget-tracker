@@ -24,8 +24,8 @@ class FamilyUserModel(BaseModel):
     """
 
     __tablename__ = "families_users"
-    user_id=Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    family_id=Column(UUID(as_uuid=True), ForeignKey('families.id'), nullable=False)
+    user_id=Column(UUID(as_uuid=True), ForeignKey('users.id',deferrable=True), nullable=False)
+    family_id=Column(UUID(as_uuid=True), ForeignKey('families.id',deferrable=True), nullable=False)
     role = Column(EnumSQL(Role, name="role_enum", native_enum=True),nullable=False)
     joined_at=Column(DateTime, default=func.now())
     user=relationship('UserModel',back_populates='families')
