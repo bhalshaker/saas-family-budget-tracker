@@ -21,3 +21,5 @@ class CategoryModel(BaseModel):
     type= Column(EnumSQL(EntryType, name="entry_type", native_enum=True),nullable=False)
     user=relationship('UserModel',back_populates='category')
     family=relationship('FamilyModel',back_populates='category')
+    transaction=relationship('TransactionModel',back_populates='category')
+    budget=relationship('BudgetModel',back_populates='category')

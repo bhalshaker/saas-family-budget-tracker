@@ -20,6 +20,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         except:
             await session.rollback()
             raise
+        
 async def recreate_db(Base):
     # Drop and recreate tables to ensure a clean slate
     async with engine.begin() as conn:

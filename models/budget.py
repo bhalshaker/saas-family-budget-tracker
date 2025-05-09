@@ -22,6 +22,7 @@ class BudgetModel(BaseModel):
     user_id=Column(UUID(as_uuid=True), ForeignKey('users.id',deferrable=True), nullable=False)
     family_id=Column(UUID(as_uuid=True), ForeignKey('families.id',deferrable=True), nullable=False)
     category_id=Column(UUID(as_uuid=True), ForeignKey('categories.id',deferrable=True), nullable=False)
+    account_id=Column(UUID(as_uuid=True), ForeignKey('accounts.id',deferrable=True), nullable=True)
     amount=Column(Numeric(scale=3),nullable=False)
     start_date=Column(DateTime(),nullable=False)
     end_date=Column(DateTime(),nullable=False)
@@ -29,4 +30,4 @@ class BudgetModel(BaseModel):
     family=relationship('FamilyModel',back_populates='budget')
     category=relationship('CategoryModel',back_populates='budget')
     transactions=relationship('BudgetTransactionModel',back_populates='budgets')
-    account=relationship('AccountModel',back_populates='buget')
+    account=relationship('AccountModel',back_populates='budget')

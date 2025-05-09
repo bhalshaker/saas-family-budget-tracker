@@ -3,7 +3,7 @@ from .user import UserModel
 from .family import FamilyModel
 from .account import AccountModel,AccountType
 from .transaction import TransactionModel
-from .attachement import AttachementModel
+from .attachment import AttachmentModel
 from .budget_transaction import BudgetTransactionModel
 from .budget import BudgetModel
 from .category import CategoryModel
