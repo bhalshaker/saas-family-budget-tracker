@@ -12,7 +12,18 @@ Create and run docker container change postgresql password with your password
 ```sh
 docker run -d --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
 ```
-
+Docker Stop
+```sh
+docker container stop mypostgres
+```
+Docker Start after first initilizations
+```sh
+docker container start mypostgres
+```
+Check for running containers
+```sh
+docker ps
+```
 ## How to access psql inside the postgresql container
 
 Assuming that the name of the running container is mypostgres
