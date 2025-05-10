@@ -21,7 +21,7 @@ class UserModel(BaseModel):
     __tablename__ = "users"
     name = Column(String(length=150),nullable=True)
     email = Column(String(255), unique=True, nullable=False)
-    password=Column(String(18), nullable=False)
+    password=Column(String, nullable=False)
     families=relationship('FamilyUserModel',back_populates='user')
     transaction=relationship('TransactionModel',back_populates='user')
     account=relationship('AccountModel', back_populates='user')

@@ -29,5 +29,5 @@ class BudgetModel(BaseModel):
     user=relationship('UserModel',back_populates='budget')
     family=relationship('FamilyModel',back_populates='budget')
     category=relationship('CategoryModel',back_populates='budget')
-    transactions=relationship('BudgetTransactionModel',back_populates='budgets')
+    transactions=relationship('BudgetTransactionModel',back_populates='budget')
     account=relationship('AccountModel',back_populates='budget')
