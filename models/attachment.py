@@ -2,7 +2,7 @@ from sqlalchemy import Column,LargeBinary,UUID,ForeignKey,DateTime,func
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 
-class AttachementModel(BaseModel):
+class AttachmentModel(BaseModel):
     """
     AttachementModel represents the database model for storing file attachments 
     associated with transactions.
@@ -16,7 +16,7 @@ class AttachementModel(BaseModel):
     """
     
     __tablename__ = "attachments"
-    transaction_id=Column(UUID(as_uuid=True), ForeignKey('users.id',deferrable=True), nullable=False)
+    transaction_id=Column(UUID(as_uuid=True), ForeignKey('transactions.id',deferrable=True), nullable=False)
     file_content = Column(LargeBinary, nullable=False)
     upload_date=Column(DateTime(),default=func.now(),nullable=False)
     transaction=relationship('TransactionModel',back_populates='attachment')

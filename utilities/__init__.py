@@ -1,0 +1,1 @@
+from .hashing import hash_a_password
