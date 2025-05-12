@@ -1,7 +1,14 @@
-from pydantic_settings import BaseSettings,SettingsConfigDict
+from pydantic import BaseModel
+from dotenv import dotenv_values
 
-class Settings(BaseSettings):
-    db_url: str
-    model_config = SettingsConfigDict(env_file=".env")
+class Config(BaseModel):
+    db_host:str
+    db_port:str
+    db_user:str
+    db_password:str
+    db_name:str
+    token_secret:str
 
-settings=Settings()
+config_env=dotenv_values(".env")
+
+config=Config(**config_env)
