@@ -19,3 +19,7 @@ class UserCreationResponse(BaseResponse):
 
 class RestUserCreationResponse(BaseRestResponse):
     user:UserCreationResponse = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str

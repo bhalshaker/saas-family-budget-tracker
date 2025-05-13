@@ -1,8 +1,7 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import UserModel
-from serializers import UserCreationResponse
-from serializers import CreateUser
+from serializers import UserCreationResponse,CreateUser,UserLogin
 
 
 async def create_user(user: CreateUser,db: AsyncSession)->UserCreationResponse:
@@ -14,3 +13,5 @@ async def create_user(user: CreateUser,db: AsyncSession)->UserCreationResponse:
     user_response=UserCreationResponse(**db_user.__dict__)
     return user_response
 
+async def user_login(user:UserLogin):
+    pass
