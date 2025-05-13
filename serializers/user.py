@@ -23,3 +23,9 @@ class RestUserCreationResponse(BaseRestResponse):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+class UserLoginResponse(BaseResponse):
+    access_token: str
+
+class RestUserLoginResponse(BaseRestResponse):
+    user: UserLoginResponse = None

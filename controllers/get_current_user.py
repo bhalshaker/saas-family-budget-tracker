@@ -1,38 +1,47 @@
-
-# dependencies/get_current_user.py
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import UserModel
 from database import get_db
-from jwt import DecodeError, ExpiredSignatureError # We import specific exceptions to handle them explicitly
+from jwt import DecodeError, ExpiredSignatureError
 from utilities import decode_token
+from controllers import get_user_by_id
 
-# We're using the HTTP Bearer scheme for the Authorization header
 http_bearer = HTTPBearer()
 
-# This function takes the database session and the JWT token from the request header
-def get_current_user(token: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)], db: Session = Depends(get_db)):
+async def get_current_user(token: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)], db: AsyncSession = Depends(get_db))->UserModel:
+    """
+    Retrieves the current authenticated user based on the provided JWT token.
+    Args:
+        token (Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)]): The HTTP bearer token credentials extracted from the request.
+        db (AsyncSession, optional): SQLAlchemy database session dependency.
+    Returns:
+        UserModel: The user model instance corresponding to the authenticated user.
+    Raises:
+        HTTPException: 
+            - 403 FORBIDDEN if the token cannot be decoded or has expired.
+            - 401 UNAUTHORIZED if the user does not exist.
+            - 403 FORBIDDEN if there is an error retrieving the user from the database.
+    """
+
     sub_val = None
     try:
         sub_val = decode_token(token.credentials)
-        user = db.query(UserModel).filter(UserModel.id == int(payload.get("sub"))).first()
-
-        # If no user is found, raise an HTTP 401 Unauthorized error
-        if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                 detail="Invalid username or password")
-    # Handle decoding errors (invalid token)
     except DecodeError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail=f'Could not decode token: {str(e)}')
-
-    # Handle expired token errors
     except ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail='Token has expired')
-
-    # Return the user if the token is valid
+    if not sub_val:
+        try:
+            user = await get_user_by_id(sub_val, db)
+            if not user:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                 detail="Invalid username or password")
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                 detail=f'Could not retrieve user: {str(e)}')
     return user
 
