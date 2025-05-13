@@ -3,7 +3,7 @@ import jwt  # New import for token generation
 import uuid
 from config import config
 
-def generate_token(id:uuid):
+def generate_token(id:str)->str:
         """
         Generates a JSON Web Token (JWT) for a given user ID.
         Args:
@@ -16,19 +16,11 @@ def generate_token(id:uuid):
             - sub: Subject (user ID)
         """
         
-        # Define the payload
-        payload = {
-            "exp": datetime.now(timezone.utc) + timedelta(days=1),
-            "iat": datetime.now(timezone.utc),
-            "sub": str(id),
-        }
-
-        # Create the JWT token
+        payload = generate_token_payload(id)
         token = jwt.encode(payload, config.token_secret, algorithm="HS256")
-
         return token
 
-def decode_token(token)->str:
+def decode_token(credentials:str)->str:
         """
         Decodes a JWT token and retrieves the subject ("sub") claim.
         Args:
@@ -37,5 +29,19 @@ def decode_token(token)->str:
             str: The subject ("sub") claim from the decoded JWT payload.
         """
         
-        payload = jwt.decode(token.credentials, config.token_secret, algorithms=["HS256"])
+        payload = jwt.decode(credentials, config.token_secret, algorithms=["HS256"])
         return payload.get("sub")
+
+def generate_token_payload(id:str,expiration_time: int = 86400) -> dict:
+    """
+    Generates a token payload with an expiration time.
+    Args:
+        expiration_time (int): The expiration time in seconds. Default is 86400 seconds (1 day).
+    Returns:
+        dict: The token payload with the expiration time.
+    """
+    return {
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=expiration_time),
+        "iat": datetime.now(timezone.utc), # Issuance timestamp
+        "sub": id
+    }
