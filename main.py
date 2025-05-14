@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from database import async_session
-from routes import UsersRouter
+from routes import UsersRouter,FamiliesRouter
 
 
 @asynccontextmanager
@@ -23,5 +23,6 @@ Designed with a RESTful API structure, the application supports integration with
             version="0.0.0",
             docs_url="/docs")
 app.include_router(router=UsersRouter, prefix="/api/v1/users", tags=["User"])
+app.include_router(router=FamiliesRouter, prefix="/api/v1/families", tags=["Family"])
 
 
