@@ -1,2 +1,2 @@
 from .base import BaseResponse,BaseRestResponse
-from .user import CreateUser,RestUserCreationResponse,UserCreationResponse,UserLogin,RestUserLoginResponse,UserLoginResponse
+from .user import CreateUser,RestUserCreationResponse,UserCreationResponse,UserLogin,RestUserLoginResponse,UserLoginResponse,UserUpdate

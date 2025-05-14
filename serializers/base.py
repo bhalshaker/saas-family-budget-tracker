@@ -8,3 +8,4 @@ class BaseRestResponse(BaseModel):
     code:int
     status:str
     message:str
+    model_config = ConfigDict(from_attributes=True)

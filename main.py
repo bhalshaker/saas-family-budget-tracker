@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from config.config import settings
 from database import async_session
 from routes import UsersRouter
 

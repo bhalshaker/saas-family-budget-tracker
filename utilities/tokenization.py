@@ -3,7 +3,7 @@ import jwt  # New import for token generation
 import uuid
 from config import config
 
-def generate_token(id:str)->str:
+def generate_token(id:str)->dict:
         """
         Generates a JSON Web Token (JWT) for a given user ID.
         Args:
@@ -11,14 +11,17 @@ def generate_token(id:str)->str:
         Returns:
             str: The encoded JWT token as a string.
         The token includes the following claims:
-            - exp: Expiration time (1 day from now)
-            - iat: Issued at time (current time)
-            - sub: Subject (user ID)
+            - expires_at: Expiration time (1 day from now)
+            - issued_at: Issued at time (current time)
+            - subject: Subject (user ID)
         """
         
         payload = generate_token_payload(id)
         token = jwt.encode(payload, config.token_secret, algorithm="HS256")
-        return token
+        user_response={"expires_at":payload["exp"],
+                       "issued_at":payload["iat"],
+                       "apikey":token}
+        return user_response
 
 def decode_token(credentials:str)->str:
         """
@@ -26,13 +29,13 @@ def decode_token(credentials:str)->str:
         Args:
             token: An object containing the JWT credentials as an attribute.
         Returns:
-            str: The subject ("sub") claim from the decoded JWT payload.
+            str: The subject claim from the decoded JWT payload.
         """
         
         payload = jwt.decode(credentials, config.token_secret, algorithms=["HS256"])
         return payload.get("sub")
 
-def generate_token_payload(id:str,expiration_time: int = 86400) -> dict:
+def generate_token_payload(id:uuid,expiration_time: int = 86400) -> dict:
     """
     Generates a token payload with an expiration time.
     Args:
@@ -43,5 +46,5 @@ def generate_token_payload(id:str,expiration_time: int = 86400) -> dict:
     return {
         "exp": datetime.now(timezone.utc) + timedelta(seconds=expiration_time),
         "iat": datetime.now(timezone.utc), # Issuance timestamp
-        "sub": id
+        "sub": str(id)
     }
