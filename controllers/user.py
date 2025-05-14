@@ -1,18 +1,19 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import UserModel
-from serializers import UserCreationResponse,CreateUser,UserLogin,RestUserLoginResponse,UserLoginResponse
+from serializers import UserCreationResponse,CreateUser,UserLogin,RestUserLoginResponse,UserLoginResponse,RestUserCreationResponse
 from utilities import verify_password,generate_token
+from uuid import UUID
 
 
-async def create_user(user: CreateUser,db: AsyncSession)->UserCreationResponse:
+async def create_user(user: CreateUser,db: AsyncSession)->RestUserCreationResponse:
     """
     Asynchronously creates a new user in the database.
     Args:
         user (CreateUser): The user data to create, typically including fields like name, email, and password.
         db (AsyncSession): The asynchronous database session used to perform database operations.
     Returns:
-        UserCreationResponse: The response object containing the created user's information.
+        RestUserCreationResponse: The response object containing the created user's information.
     Raises:
         Exception: If the database operation fails.
     Side Effects:
@@ -22,10 +23,14 @@ async def create_user(user: CreateUser,db: AsyncSession)->UserCreationResponse:
 
     db_user = UserModel(**user.model_dump(exclude={'plain_password'}))
     db.add(db_user)
-    await db.commit()
-    await db.refresh(db_user)
-    user_response=UserCreationResponse(**db_user.__dict__)
-    return user_response
+    try:
+        await db.commit()
+        await db.refresh(db_user)
+        user_response=UserCreationResponse(**db_user.__dict__)
+        return RestUserCreationResponse(code=1,status="SUCCESSFUL",message="User created successfully",user=user_response)
+    except Exception as e:
+        await db.rollback()
+        return RestUserCreationResponse(code=0,status="FAILED",message="Failed to create a new user")
 
 async def user_login(user:UserLogin,db:AsyncSession)->RestUserLoginResponse:
     """
@@ -40,12 +45,12 @@ async def user_login(user:UserLogin,db:AsyncSession)->RestUserLoginResponse:
         if not db_user:
             return RestUserLoginResponse(0,"Failed to login","Make sure you have entered the correct email and password",None)
         if not await verify_password(user.password, db_user.password):
-            return False
+            return RestUserLoginResponse(0,"Failed to login","Make sure you have entered the correct email and password",None)
     except Exception as e:
         return RestUserLoginResponse(0,"Failed to login","Could not generate login token",None)
     try:
-        token=generate_token(db_user.id)
-        return RestUserLoginResponse(1,"Successfully logged in","You have logged in successfully",UserLoginResponse(token))
+        access_token=generate_token(db_user.id)
+        return RestUserLoginResponse(code=1,status="Successfully logged in",message="You have logged in successfully",user_key=UserLoginResponse(**access_token))
     except Exception as e:
         return RestUserLoginResponse(0,"Failed to login","Could not generate login token",None)
 
@@ -59,7 +64,8 @@ async def get_user_by_id(user_id: str, db: AsyncSession) -> UserModel:
     Returns:
         UserModel: The user object if found, None otherwise.
     """
-    user= await db.execute(select(UserModel).where(UserModel.id == user_id)).scalars().first()
+    result= await db.execute(select(UserModel).where(UserModel.id == UUID(user_id)))
+    user = result.scalars().first()
     return user
 
 async def get_user_by_email(email: str, db: AsyncSession) -> UserModel:
@@ -71,5 +77,25 @@ async def get_user_by_email(email: str, db: AsyncSession) -> UserModel:
     Returns:
         user: The user object if found, otherwise None.
     """
-    user=await db.execute(select(UserModel).where(UserModel.email == email)).scalars().first()
+    result = await db.execute(select(UserModel).where(UserModel.email == email))
+    user = result.scalars().first()
     return user
+
+async def update_user(user_id: str, user: CreateUser, db: AsyncSession) -> UserCreationResponse:
+    """
+    Asynchronously updates a user's information in the database.
+    Args:
+        user_id (str): The ID of the user to update.
+        user (UpdateUser): The new user data to update.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        UserCreationResponse: The updated user object.
+    """
+    db_user = await get_user_by_id(user_id, db)
+    if not db_user:
+        raise Exception("User not found")
+    for key, value in user.model_dump(exclude={'plain_password'}).items():
+        setattr(db_user, key, value)
+    await db.commit()
+    await db.refresh(db_user)
+    return UserCreationResponse(**db_user.__dict__)
