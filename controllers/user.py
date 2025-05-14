@@ -35,12 +35,14 @@ async def user_login(user:UserLogin,db:AsyncSession)->RestUserLoginResponse:
     Returns:
         bool: True if the login is successful, False otherwise.
     """
-    
-    db_user = await get_user_by_email(user.email)
-    if not db_user:
-        return RestUserLoginResponse(0,"Failed to login","Make sure you have entered the correct email and password",None)
-    if not await verify_password(user.password, db_user.password):
-        return False
+    try:
+        db_user = await get_user_by_email(user.email,db)
+        if not db_user:
+            return RestUserLoginResponse(0,"Failed to login","Make sure you have entered the correct email and password",None)
+        if not await verify_password(user.password, db_user.password):
+            return False
+    except Exception as e:
+        return RestUserLoginResponse(0,"Failed to login","Could not generate login token",None)
     try:
         token=generate_token(db_user.id)
         return RestUserLoginResponse(1,"Successfully logged in","You have logged in successfully",UserLoginResponse(token))
