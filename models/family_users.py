@@ -4,6 +4,7 @@ from .base import BaseModel
 import enum
 
 class Role(enum.Enum):
+    OWNER = "owner"
     PARENT = "parent"
     BIG_SIBLING="big sibling"
     CHILD = "child"
