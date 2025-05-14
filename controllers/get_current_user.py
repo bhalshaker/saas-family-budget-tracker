@@ -28,20 +28,23 @@ async def get_current_user(token: Annotated[HTTPAuthorizationCredentials, Depend
     sub_val = None
     try:
         sub_val = decode_token(token.credentials)
+        if sub_val:
+            try:
+                user = await get_user_by_id(sub_val, db)
+                if not user:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                 detail="Invalid username or password")
+                return user
+            except Exception as e:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                 detail=f'Could not retrieve user: {str(e)}')
+        else:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail='System Failed to Authenticate token')
     except DecodeError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail=f'Could not decode token: {str(e)}')
     except ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail='Token has expired')
-    if not sub_val:
-        try:
-            user = await get_user_by_id(sub_val, db)
-            if not user:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                 detail="Invalid username or password")
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                 detail=f'Could not retrieve user: {str(e)}')
-    return user
 

@@ -50,3 +50,6 @@ class UserLoginResponse(BaseResponse):
 
 class RestUserLoginResponse(BaseRestResponse):
     user_key: UserLoginResponse = None
+
+class RestGetllAllUsers(BaseRestResponse):
+    users: list[UserCreationResponse]
