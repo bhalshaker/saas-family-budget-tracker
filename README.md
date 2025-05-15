@@ -100,10 +100,10 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 🔁 Budget Transactions
 | Method | Route                                                   | Description                          |
 |--------|----------------------------------------------------------|--------------------------------------|
-| GET    | /families/{family_id}/budgettransactions                                      | List all budget-transaction mappings |
-| POST   | /families/{family_id}/budgettransactions                                      | Link a transaction to a budget       |
-| GET    | /budgettransactions/{budget_id}/{transaction_id}         | Get a specific mapping               |
-| DELETE | /budgettransactions/{budget_id}/{transaction_id}         | Remove a transaction from a budget   |
+| GET    | /families/{family_id}/budgettransactions                 | List all budget-transaction mappings |
+| POST   | /families/{family_id}/budgettransactions                 | Link a transaction to a budget       |
+| GET    | /budgettransactions/{budget_transaction_id}         | Get a specific mapping               |
+| DELETE | /budgettransactions/{budget_transaction_id}         | Remove a transaction from a budget   |
 
 ## 📚 Libraries & Technologies Used
 
