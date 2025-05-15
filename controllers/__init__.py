@@ -20,3 +20,4 @@ from .transaction import retrieve_transaction as ControllerRetrieveTransaction,u
 from .user import create_user as ControllerCreateUser,user_login as ControllerUserLogin
 from .user import update_user as ControllerUpdateUser,delete_user as ControllerDeleteUser,get_all_users as ControllerGetAllUsers
 from .user import get_user as ControllerGetUser
+from .user import get_user_by_id as ControllerGetUserById
