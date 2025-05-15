@@ -8,10 +8,7 @@ async def add_budget_transaction_for_family(family_id: str, new_budget_transacti
     pass
 
 async def retrieve_budget_transaction(budget_transaction_id: str, current_user: UserModel, db: AsyncSession):
-    pass
-
-async def update_budget_transaction(budget_transaction_id: str, updated_budget_transaction: dict, current_user: UserModel, db: AsyncSession):
-    pass
+    passS
 
 async def delete_budget_transaction(budget_transaction_id: str, current_user: UserModel, db: AsyncSession):
     pass
