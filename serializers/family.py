@@ -4,10 +4,11 @@ from uuid import UUID
 
 class CreateFamily(BaseModel):
     name: str
-
-class CreatedFamily(BaseModel):
+class FamilyInfo(BaseModel):
     id: UUID
     name: str
+
+class CreatedFamily(FamilyInfo):
     owner: UserCreationResponse
     
 class RestFamilyCreationResponse(BaseRestResponse):
@@ -15,3 +16,7 @@ class RestFamilyCreationResponse(BaseRestResponse):
 
 class RestGetAllFamiliesResponse(BaseRestResponse):
     families: list[CreatedFamily]
+
+class RestGetAllUsersInFamilyResponse(BaseRestResponse):
+    family: FamilyInfo = None
+    users: list[UserCreationResponse] = None
