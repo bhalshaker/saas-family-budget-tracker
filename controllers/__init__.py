@@ -1,6 +1,7 @@
 from .account import get_all_family_accounts as ControllerGetAllFamilyAccounts,create_new_account as ControllerCreateNewAccount
 from .account import delete_account as ControllerDeleteAccount,update_account as ControllerUpdateAccount,get_account as ControllerGetAccount
-from .user import create_user,get_user_by_id,user_login,update_user,delete_user
+from .category import get_all_categories_of_family as ControllerGetAllCategoriesOfFamily,create_category_for_family as ControllerCreateCategoryForFamily
+from .category import retrieve_category as ControllerRetrieveCategory,update_category as ControllerUpdateCategory,delete_category as ControllerDeleteCategory
 from .user import create_user as ControllerCreateUser,user_login as ControllerUserLogin
 from .user import update_user as ControllerUpdateUser,delete_user as ControllerDeleteUser,get_all_users as ControllerGetAllUsers
 from .user import get_user as ControllerGetUser
