@@ -6,7 +6,7 @@ from models.user import UserModel
 from database import get_db
 from jwt import DecodeError, ExpiredSignatureError
 from utilities import decode_token
-from controllers import get_user_by_id
+from controllers import ControllerGetUserById
 
 http_bearer = HTTPBearer()
 
@@ -30,7 +30,7 @@ async def get_current_user(token: Annotated[HTTPAuthorizationCredentials, Depend
         sub_val = decode_token(token.credentials)
         if sub_val:
             try:
-                user = await get_user_by_id(sub_val, db)
+                user = await ControllerGetUserById(sub_val, db)
                 if not user:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                  detail="Invalid username or password")
