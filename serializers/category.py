@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from models import EntryType
 from typing import Optional,List
-from serializers.base import BaseRestResponse
+from .base import BaseRestResponse
 from uuid import UUID
 
 class CreateCategory(BaseModel):

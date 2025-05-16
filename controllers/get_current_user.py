@@ -6,7 +6,7 @@ from models.user import UserModel
 from database import get_db
 from jwt import DecodeError, ExpiredSignatureError
 from utilities import decode_token
-from controllers import ControllerGetUserById
+from .user import get_user_by_id as ControllerGetUserById
 
 http_bearer = HTTPBearer()
 

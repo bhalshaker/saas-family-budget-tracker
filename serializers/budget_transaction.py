@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 from typing import Optional, List
 
 class CreateBudgetTransaction(BaseModel):

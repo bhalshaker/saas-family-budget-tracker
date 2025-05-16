@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional,List
 from datetime import datetime
 from uuid import UUID
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 
 class CreateGoal(BaseModel):
     name:str

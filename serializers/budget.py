@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional,List
 from uuid import UUID
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 
 class CreateBudget(BaseModel):
     category_id: str

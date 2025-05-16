@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from typing import Optional
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 from datetime import datetime
 
 class AttachmentInfo(BaseModel):
@@ -13,4 +13,4 @@ class RestCreateAttachmentResponse(BaseRestResponse):
     attachment: AttachmentInfo
 
 class RestGetAttachmentOfTransactionResponse(RestCreateAttachmentResponse):
-    pass
+    attachtment: AttachmentInfo

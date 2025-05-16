@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from models import FamilyUserRole
-from serializers import BaseRestResponse,FamilyInfo
+from .base import BaseRestResponse
+from .family import FamilyInfo
 from uuid import UUID
 from datetime import datetime
 from typing import Optional,List
@@ -21,4 +22,5 @@ class RestAddUserToFamilyResponse(BaseRestResponse):
     family_user_info: FamilyUserInfo
 
 class RestGetFamiliesUserBelongsToResponse(BaseRestResponse):
-    families=Optional[List[FamilyInfo]] = None
+    #families=Optional[List[FamilyInfo]] = None
+    family_users: Optional[List[FamilyUserInfo]] = None

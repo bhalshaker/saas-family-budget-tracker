@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional,List
 from models import EntryType
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 from uuid import UUID
 
 class CreateTransaction(BaseModel):

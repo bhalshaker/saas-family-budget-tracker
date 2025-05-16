@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from models import AccountType
 from typing import Optional,List
-from serializers import BaseRestResponse
+from .base import BaseRestResponse
 
 class CreateAccount(BaseModel):
     name:str
