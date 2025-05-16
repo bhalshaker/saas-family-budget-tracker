@@ -2,7 +2,7 @@ from models import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import StreamingResponse
 from fastapi import UploadFile
-from serializers import CreateAttachment, RestCreateAttachmentResponse, RestGetAttachmentOfTransactionResponse, BaseRestResponse
+from serializers import RestCreateAttachmentResponse, RestGetAttachmentOfTransactionResponse, BaseRestResponse
 
 async def get_attachement_of_transaction(transaction_id: str, current_user: UserModel, db: AsyncSession)->RestGetAttachmentOfTransactionResponse:
     pass

@@ -1,0 +1,16 @@
+from pydantic import BaseModel
+from uuid import UUID
+from typing import Optional
+from serializers import BaseRestResponse
+from datetime import datetime
+
+class AttachmentInfo(BaseModel):
+    id: UUID
+    transaction_id: UUID
+    upload_date:datetime
+
+class RestCreateAttachmentResponse(BaseRestResponse):
+    attachment: AttachmentInfo
+
+class RestGetAttachmentOfTransactionResponse(RestCreateAttachmentResponse):
+    pass
