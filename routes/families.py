@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from serializers import RestFamilyCreationResponse,RestGetAllFamiliesResponse,CreateFamily
 from controllers import ControllerCreateFamily,ControllerGetFamily,ControllerGetAllFamilies,ControllerDeleteFamily,ControllerUpdateFamily
 from models import UserModel
