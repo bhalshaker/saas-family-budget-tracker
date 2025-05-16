@@ -19,7 +19,7 @@ async def get_all_users(db: AsyncSession) -> RestGetllAllUsers:
         users = [UserCreationResponse(**user.__dict__) for user in users_results]
         return RestGetllAllUsers(code=1,status="SUCCESSFUL",message="Users retrieved successfully",users=users)
     except:
-        return RestGetllAllUsers(code=0,status="FAILED",message="Failed to retrieve users", users=[])
+        return RestGetllAllUsers(code=0,status="FAILED",message="Failed to retrieve users")
 
 async def get_user(user_id: str, db: AsyncSession) -> RestUserCreationResponse:
     """

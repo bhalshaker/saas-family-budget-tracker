@@ -1,5 +1,5 @@
 from models import FamilyModel,UserModel
-from serializers import UserCreationResponse,FamilyInfo,RestGetAllUsersInFamilyResponse,AddUserToFamily
+from serializers import UserCreationResponse,FamilyInfo,RestGetAllUsersInFamilyResponse,AddUserToFamily,RestAddUserToFamilyResponse,BaseRestResponse,RestGetFamiliesUserBelongsToResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 async def get_all_users_in_family(family_id: str,current_user: UserModel, db: AsyncSession) -> RestGetAllUsersInFamilyResponse:
@@ -29,11 +29,11 @@ async def get_all_users_in_family(family_id: str,current_user: UserModel, db: As
                                                family=FamilyInfo(**family.model_dmup()),
                                                users=[UserCreationResponse(**user.__dict__) for user in family.users])
 
-async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,current_user: UserModel,db: AsyncSession):
+async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,current_user: UserModel,db: AsyncSession)->RestAddUserToFamilyResponse:
     pass
 
-async def remove_user_from_family(family_id:str,user_id: str,current_user: UserModel,db: AsyncSession):
+async def remove_user_from_family(family_id:str,user_id: str,current_user: UserModel,db: AsyncSession)->BaseRestResponse:
     pass
 
-async def get_family_user_belongs_to(user_id:str,current_user: UserModel,db: AsyncSession):
+async def get_families_user_belongs_to(user_id:str,current_user: UserModel,db: AsyncSession)->RestGetFamiliesUserBelongsToResponse:
     pass

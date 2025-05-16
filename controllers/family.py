@@ -2,9 +2,7 @@ from serializers import RestFamilyCreationResponse, CreateFamily,CreatedFamily,U
 from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from sqlalchemy.ext.asyncio import AsyncSession
 
-async def create_family(new_family: CreateFamily,
-                        current_user: UserModel,
-                        db: AsyncSession)->RestFamilyCreationResponse:
+async def create_family(new_family: CreateFamily,current_user: UserModel,db: AsyncSession)->RestFamilyCreationResponse:
     """
     Asynchronously creates a new family and associates the current user as the owner.
     Args:
@@ -104,17 +102,15 @@ async def delete_family(family_id: str,current_user:UserModel,db: AsyncSession)-
     except Exception as e:
         return RestFamilyCreationResponse(code=0,status="FAILED",message=f"Failed to delete family: {str(e)}")
 
-async def update_family(family_id: str,
-                        current_user:UserModel,
-                        db: AsyncSession,
-                        updated_family: CreateFamily)->RestFamilyCreationResponse:
+async def update_family(family_id: str,updated_family: CreateFamily,current_user:UserModel,db: AsyncSession)->RestFamilyCreationResponse:
     """
     Asynchronously updates a family by its ID.
     Args:
         family_id (str): The ID of the family to update.
+        updated_family (CreateFamily): The updated family data.
         current_user (UserModel): The user requesting the update.
         db (AsyncSession): The asynchronous database session for performing database operations.
-        updated_family (CreateFamily): The updated family data.
+
     Returns:
         RestFamilyCreationResponse: The response object containing the status, message, and updated family details if successful.
     """

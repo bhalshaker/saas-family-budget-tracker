@@ -2,7 +2,7 @@ from pydantic import EmailStr,computed_field,BaseModel
 from serializers import BaseResponse,BaseRestResponse
 from utilities import hash_a_password
 from datetime import datetime
-from typing import Optional
+from typing import Optional,List
 from uuid import UUID
 
 
@@ -18,7 +18,7 @@ class CreateUser(BaseModel):
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
-    plain_password: Optional[bool] = None
+    plain_password: Optional[str] = None
 
     @computed_field
     @property
@@ -49,7 +49,7 @@ class UserLoginResponse(BaseResponse):
         return f"Bearer {self.apikey}"
 
 class RestUserLoginResponse(BaseRestResponse):
-    user_key: UserLoginResponse = None
+    user_key: Optional[UserLoginResponse] = None
 
 class RestGetllAllUsers(BaseRestResponse):
-    users: list[UserCreationResponse]
+    users: Optional[List[UserCreationResponse]]=None

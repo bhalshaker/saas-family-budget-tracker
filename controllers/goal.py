@@ -1,18 +1,18 @@
 from models import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from  serializers import CreateGoal, UpdateGoal
+from serializers import CreateGoal, UpdateGoal, RestCreateGoalResponse, RestGetGoalResponse, RestGetAllGoalsOfamilyResponse, BaseRestResponse
 
-async def get_all_goals_of_family(family_id: str, current_user: UserModel, db: AsyncSession):
+async def get_all_goals_of_family(family_id: str, current_user: UserModel, db: AsyncSession)->RestGetAllGoalsOfamilyResponse:
     pass
 
-async def create_goal_for_family(family_id: str, new_goal: CreateGoal, current_user: UserModel, db: AsyncSession):
+async def create_goal_for_family(family_id: str, new_goal: CreateGoal, current_user: UserModel, db: AsyncSession)-> RestCreateGoalResponse:
     pass
 
-async def retrieve_goal(goal_id: str, current_user: UserModel, db: AsyncSession):
+async def retrieve_goal(goal_id: str, current_user: UserModel, db: AsyncSession)->RestGetGoalResponse:
     pass
 
-async def update_goal(goal_id: str, updated_goal: UpdateGoal, current_user: UserModel, db: AsyncSession):
+async def update_goal(goal_id: str, updated_goal: UpdateGoal, current_user: UserModel, db: AsyncSession)->RestCreateGoalResponse:
     pass
 
-async def delete_goal(goal_id: str, current_user: UserModel, db: AsyncSession):
+async def delete_goal(goal_id: str, current_user: UserModel, db: AsyncSession)->BaseRestResponse:
     pass

@@ -22,7 +22,5 @@ Users can create accounts, categorize transactions, assign budgets, and track sa
 Designed with a RESTful API structure, the application supports integration with web and mobile interfaces, empowering families to plan and manage their finances together — with clarity, control, and transparency.""",
             version="0.0.0",
             docs_url="/docs")
-app.include_router(router=UsersRouter, prefix="/api/v1/users", tags=["User"])
-app.include_router(router=FamiliesRouter, prefix="/api/v1/families", tags=["Family"])
-
-
+app.include_router(router=UsersRouter, tags=["User"])
+app.include_router(router=FamiliesRouter, tags=["Family"])
