@@ -4,6 +4,7 @@ from uuid import UUID
 
 class CreateFamily(BaseModel):
     name: str
+    
 class FamilyInfo(BaseModel):
     id: UUID
     name: str

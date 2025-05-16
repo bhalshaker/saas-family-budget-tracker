@@ -50,6 +50,23 @@ async def get_family(family_id: str,current_user:UserModel=Depends(get_current_u
 
     return await ControllerGetFamily(family_id=family_id,current_user=current_user,db=db)
 
+@router.put(path="/api/v1/families/{family_id}",
+            response_model=RestFamilyCreationResponse,summary="Update family by ID",
+            description="""Update family by ID.
+            This endpoint allows you to update a family by its ID. The updated family details will be returned in the response.""")
+async def update_family_by_id(family_id: str,updated_family:CreateFamily,current_user:UserModel=Depends(get_current_user),db: AsyncSession = Depends(get_db))->RestFamilyCreationResponse:
+    """
+    Update a family record by its ID.
+    Args:
+        family_id (str): The unique identifier of the family to update.
+        current_user (UserModel, optional): The currently authenticated user, injected by dependency.
+        db (AsyncSession, optional): The asynchronous database session, injected by dependency.
+    Returns:
+        RestFamilyCreationResponse: The response containing the updated family information.
+    """
+
+    return await ControllerUpdateFamily(family_id=family_id,updated_family=updated_family,current_user=current_user,db=db)
+
 @router.delete(path="/api/v1/families/{family_id}",
             response_model=RestFamilyCreationResponse,summary="Delete family by ID",
             description="""Delete family by ID.
@@ -66,19 +83,3 @@ async def delete_family(family_id: str,current_user:UserModel=Depends(get_curren
     """
 
     return await ControllerDeleteFamily(family_id=family_id,current_user=current_user,db=db)
-@router.put(path="/api/v1/families/{family_id}",
-            response_model=RestFamilyCreationResponse,summary="Update family by ID",
-            description="""Update family by ID.
-            This endpoint allows you to update a family by its ID. The updated family details will be returned in the response.""")
-async def update_family_by_id(family_id: str,current_user:UserModel=Depends(get_current_user),db: AsyncSession = Depends(get_db))->RestFamilyCreationResponse:
-    """
-    Update a family record by its ID.
-    Args:
-        family_id (str): The unique identifier of the family to update.
-        current_user (UserModel, optional): The currently authenticated user, injected by dependency.
-        db (AsyncSession, optional): The asynchronous database session, injected by dependency.
-    Returns:
-        RestFamilyCreationResponse: The response containing the updated family information.
-    """
-
-    return await ControllerUpdateFamily(family_id=family_id,current_user=current_user,db=db)

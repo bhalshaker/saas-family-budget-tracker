@@ -42,19 +42,19 @@ async def get_transaction(transaction_id:str, current_user:UserModel=Depends(get
     return await ControllerRetrieveTransaction(transaction_id=transaction_id, current_user=current_user, db=db)
 
 @router.put("/api/v1/transactions/{transaction_id}")
-async def update_transaction(transaction_id:str, update_category:UpdateTransaction,current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->RestCreatedTransactionResponse:
+async def update_transaction(transaction_id:str, update_transaction:UpdateTransaction,current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->RestCreatedTransactionResponse:
     """
     Update an existing transaction with new data.
     Args:
         transaction_id (str): The unique identifier of the transaction to update.
-        update_category (UpdateTransaction): The data to update the transaction with.
+        update_transaction (UpdateTransaction): The data to update the transaction with.
         current_user (UserModel, optional): The currently authenticated user. Injected by dependency.
         db (AsyncSession, optional): The database session. Injected by dependency.
     Returns:
         RestCreatedTransactionResponse: The updated transaction response.
     """
     
-    return await ControllerUpdateTransaction(transaction_id=transaction_id, updated_transaction=update_category, current_user=current_user, db=db)
+    return await ControllerUpdateTransaction(transaction_id=transaction_id, updated_transaction=update_transaction, current_user=current_user, db=db)
 
 @router.delete("/api/v1/transactions/{transaction_id}")
 async def delete_transaction(transaction_id:str, current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->BaseRestResponse:
