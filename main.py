@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from database import async_session
-from routes import UsersRouter,FamiliesRouter
+from routes import UsersRouter,FamiliesRouter,FamilyUsersRouter,AccountsRouter,AttachmentsRouter
+from routes import BudgetsRouter,CategoriesRouter,TransactionsRouter,GoalsRouter,BudgetsTransactionsRouter
 
 
 @asynccontextmanager
@@ -24,3 +25,11 @@ Designed with a RESTful API structure, the application supports integration with
             docs_url="/docs")
 app.include_router(router=UsersRouter, tags=["User"])
 app.include_router(router=FamiliesRouter, tags=["Family"])
+app.include_router(router=FamilyUsersRouter, tags=["Family","Users"])
+app.include_router(router=AccountsRouter, tags=["Account","Family"])
+app.include_router(router=BudgetsRouter, tags=["Budget","Family"])
+app.include_router(router=CategoriesRouter, tags=["Category","Family"])
+app.include_router(router=TransactionsRouter, tags=["Transaction","Family"])
+app.include_router(router=GoalsRouter, tags=["Goal","Family"])
+app.include_router(router=BudgetsTransactionsRouter, tags=["Budget","Transaction"])
+app.include_router(router=AttachmentsRouter, tags=["Attachment","Transaction"])
