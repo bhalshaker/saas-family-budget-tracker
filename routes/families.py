@@ -59,6 +59,7 @@ async def update_family_by_id(family_id: str,updated_family:CreateFamily,current
     Update a family record by its ID.
     Args:
         family_id (str): The unique identifier of the family to update.
+        updated_family (CreateFamily): The data model containing the updated family information.
         current_user (UserModel, optional): The currently authenticated user, injected by dependency.
         db (AsyncSession, optional): The asynchronous database session, injected by dependency.
     Returns:

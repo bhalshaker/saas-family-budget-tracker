@@ -11,7 +11,7 @@ from .category import retrieve_category as ControllerRetrieveCategory,update_cat
 from .family import create_family as ControllerCreateFamily,delete_family as ControllerDeleteFamily,update_family as ControllerUpdateFamily
 from .family import get_family as ControllerGetFamily,get_all_families as ControllerGetAllFamilies
 from .family_user import get_all_users_in_family as ControllerGetAllUsersInFamily,add_user_to_family as ControllerAddUserToFamily
-from .family_user import remove_user_from_family as ControllerRemoveUserFromFamily,get_family_user_belongs_to as ControllerGetFamilyUserBelongsTo
+from .family_user import remove_user_from_family as ControllerRemoveUserFromFamily,get_families_user_belongs_to as ControllerGetFamiliesUserBelongsTo
 from .get_current_user import get_current_user
 from .goal import get_all_goals_of_family as ControllerGetAllGoalsOfFamily,create_goal_for_family as ControllerCreateGoalForFamily
 from .goal import retrieve_goal as ControllerRetrieveGoal,update_goal as ControllerUpdateGoal,delete_goal as ControllerDeleteGoal
