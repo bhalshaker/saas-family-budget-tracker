@@ -9,7 +9,7 @@ from models import UserModel
 router = APIRouter()
 
 
-@router.get(path="/me",response_model=RestUserCreationResponse,summary="Get current user",description="This services gets the current user")
+@router.get(path="/api/v1/users/me",response_model=RestUserCreationResponse,summary="Get current user",description="This services gets the current user")
 async def get_current_user_info(current_user: UserModel = Depends(get_current_user)):
     """
     Retrieves the current authenticated user's information.
@@ -20,7 +20,7 @@ async def get_current_user_info(current_user: UserModel = Depends(get_current_us
     """
     return RestUserCreationResponse(code=1,status="SUCCESSFUL",message="User retrieved successfully",user=current_user)
 
-@router.get(path="/",response_model=RestGetllAllUsers,summary="Get all users",description="This services gets all users")
+@router.get(path="/api/v1/users/",response_model=RestGetllAllUsers,summary="Get all users",description="This services gets all users")
 async def get_all_users(db:AsyncSession=Depends(get_db)):
     """
     Asynchronously retrieves all users from the database.
@@ -32,7 +32,7 @@ async def get_all_users(db:AsyncSession=Depends(get_db)):
 
     return await ControllerGetAllUsers(db)
 
-@router.post(path="/",response_model=RestUserCreationResponse,summary="Create a user",description="This services creates a user")
+@router.post(path="/api/v1/users/",response_model=RestUserCreationResponse,summary="Create a user",description="This services creates a user")
 async def create_user(user:CreateUser,db:AsyncSession=Depends(get_db)):
     """
     Asynchronously creates a new user in the database.
@@ -46,7 +46,7 @@ async def create_user(user:CreateUser,db:AsyncSession=Depends(get_db)):
     created_user_retults=await ControllerCreateUser(user,db)
     return created_user_retults
 
-@router.post("/login", response_model=RestUserLoginResponse,summary="Login a user",description="This services logs in a user")
+@router.post("/api/v1/users/login", response_model=RestUserLoginResponse,summary="Login a user",description="This services logs in a user")
 async def user_login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     """
     Asynchronously logs in a user by validating their credentials.
@@ -59,7 +59,7 @@ async def user_login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     login_response = await ControllerUserLogin(user, db)
     return login_response
 
-@router.get(path="/{user_id}",response_model=RestUserCreationResponse,summary="Get a user",description="This services gets a user")
+@router.get(path="/api/v1/users/{user_id}",response_model=RestUserCreationResponse,summary="Get a user",description="This services gets a user")
 async def get_user(user_id:str,db:AsyncSession=Depends(get_db)):
     """
     Asynchronously retrieves a user by their ID from the database.
@@ -72,7 +72,7 @@ async def get_user(user_id:str,db:AsyncSession=Depends(get_db)):
 
     return await ControllerGetUser(user_id,db)
 
-@router.put(path="/{user_id}",response_model=RestUserCreationResponse,summary="Update a user",description="This services updates a user")
+@router.put(path="/api/v1/users/{user_id}",response_model=RestUserCreationResponse,summary="Update a user",description="This services updates a user")
 async def update_user(user_id:str,updated_user:UserUpdate,current_user: UserModel = Depends(get_current_user),db:AsyncSession=Depends(get_db)):
     """
     Asynchronously updates a user's information.
@@ -87,7 +87,7 @@ async def update_user(user_id:str,updated_user:UserUpdate,current_user: UserMode
     print()
     return await ControllerUpdateUser(user_id,updated_user,current_user,db)
 
-@router.delete(path="/{user_id}",response_model=BaseRestResponse,summary="Delete a user",description="This services deletes users without transactions")
+@router.delete(path="/api/v1/users/{user_id}",response_model=BaseRestResponse,summary="Delete a user",description="This services deletes users without transactions")
 async def delete_user(user_id:str,current_user: UserModel = Depends(get_current_user),db:AsyncSession=Depends(get_db)):
     """
     Deletes a user by their user ID.
