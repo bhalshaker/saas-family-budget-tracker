@@ -8,10 +8,12 @@ from serializers import CreateTransaction,UpdateTransaction,BaseRestResponse,Res
 
 router = APIRouter()
 
+# Get all transactions of a family
 @router.get("/api/v1/families/{family_id}/transactions")
 async def get_all_transactions_of_family(family_id:str, db: AsyncSession = Depends(get_db))->RestGetAllTransactionsOfamilyResponse:
     return await ControllerGetAllTransactionsOfFamily(family_id=family_id, db=db)
 
+# Create a new transaction for a family
 @router.post("/api/v1/families/{family_id}/transactions")
 async def create_new_transaction(family_id:str,new_transaction: CreateTransaction,current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->RestCreatedTransactionResponse:
     """
@@ -27,6 +29,7 @@ async def create_new_transaction(family_id:str,new_transaction: CreateTransactio
     
     return await ControllerCreateTransactionForFamily(family_id=family_id, new_transaction=new_transaction, current_user=current_user, db=db)
 
+# Get a specific transaction
 @router.get("/api/v1/transactions/{transaction_id}")
 async def get_transaction(transaction_id:str, current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->RestGetTransactionResponse:
     """
@@ -41,6 +44,7 @@ async def get_transaction(transaction_id:str, current_user:UserModel=Depends(get
     
     return await ControllerRetrieveTransaction(transaction_id=transaction_id, current_user=current_user, db=db)
 
+#Upaate a transaction
 @router.put("/api/v1/transactions/{transaction_id}")
 async def update_transaction(transaction_id:str, update_transaction:UpdateTransaction,current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->RestCreatedTransactionResponse:
     """
@@ -56,6 +60,7 @@ async def update_transaction(transaction_id:str, update_transaction:UpdateTransa
     
     return await ControllerUpdateTransaction(transaction_id=transaction_id, updated_transaction=update_transaction, current_user=current_user, db=db)
 
+# Delete a transaction
 @router.delete("/api/v1/transactions/{transaction_id}")
 async def delete_transaction(transaction_id:str, current_user:UserModel=Depends(get_current_user), db: AsyncSession = Depends(get_db))->BaseRestResponse:
     """
