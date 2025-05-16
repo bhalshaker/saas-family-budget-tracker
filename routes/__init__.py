@@ -1,2 +1,10 @@
 from .users import router as UsersRouter
 from .families import router as FamiliesRouter
+from .family_users import router as FamilyUsersRouter
+from .accounts import router as AccountsRouter
+from .attachments import router as AttachmentsRouter
+from .budgets import router as BudgetsRouter
+from .categories import router as CategoriesRouter
+from .transactions import router as TransactionsRouter
+from .goals import router as GoalsRouter
+from .budgets_transactions import router as BudgetsTransactionsRouter
