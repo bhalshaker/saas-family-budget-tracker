@@ -110,6 +110,7 @@ async def update_family(family_id: str,updated_family: CreateFamily,current_user
         updated_family (CreateFamily): The updated family data.
         current_user (UserModel): The user requesting the update.
         db (AsyncSession): The asynchronous database session for performing database operations.
+
     Returns:
         RestFamilyCreationResponse: The response object containing the status, message, and updated family details if successful.
     """
