@@ -26,4 +26,4 @@ class RestGetCategoryResponse(BaseRestResponse):
     category: CreatedCategory
 
 class RestGetAllCategoriesOfamilyResponse(BaseRestResponse):
-    categories: List[CreatedCategory]
+    categories: Optional[List[CreatedCategory]]=None
