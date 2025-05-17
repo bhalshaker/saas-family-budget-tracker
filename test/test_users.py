@@ -54,11 +54,16 @@ def test_get_current_user_info():
     assert response.status_code == 200
     assert response.json()["code"] == 1
     assert response.json()["status"] == "SUCCESSFUL"
+    assert "user" in response.json()
+    assert "password" not in response.json()["user"]  # Password should not be returned
+    assert response.json()["user"]["email"] == user_test_data["valid_user"]["email"]
 
 def test_get_all_users():
+    client.post("/api/v1/users/", json=user_test_data["valid_user"])
     response = client.get("/api/v1/users/")
     assert response.status_code == 200
     assert "users" in response.json()
+    assert len(response.json()["users"])>0
 
 def test_get_user_by_id():
     create_resp = client.post("/api/v1/users/", json=user_test_data["valid_user"])
@@ -75,7 +80,7 @@ def test_update_user_success():
     headers = {"Authorization": token} if token else {}
     response = client.put(f"/api/v1/users/{user_id}", json=user_test_data["update_user"], headers=headers)
     assert response.status_code == 200
-    assert response.json()["code"] in [0, 1]  # Could be forbidden or successful
+    assert response.json()["code"] == 1
 
 def test_delete_user_success():
     create_resp = client.post("/api/v1/users/", json=user_test_data["valid_user"])
@@ -85,4 +90,4 @@ def test_delete_user_success():
     headers = {"Authorization": token} if token else {}
     response = client.delete(f"/api/v1/users/{user_id}", headers=headers)
     assert response.status_code == 200
-    assert response.json()["code"] in [0, 1]  # Could be forbidden or successful
+    assert response.json()["code"] == 1
