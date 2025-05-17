@@ -4,7 +4,7 @@ from lib import create_user, login
 from main import app
 
 client = TestClient(app)
-
+    
 # Test data for user scenarios
 user_test_data = {
     "valid_user": {"name": "Test User", "email": "testuser@example.com", "plain_password": "TestPass123"},
