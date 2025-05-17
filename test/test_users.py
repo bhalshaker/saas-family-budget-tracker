@@ -4,7 +4,7 @@ from lib import create_user, login
 from main import app
 
 client = TestClient(app)
-    
+
 # Test data for user scenarios
 user_test_data = {
     "valid_user": {"name": "Test User", "email": "testuser@example.com", "plain_password": "TestPass123"},
@@ -23,7 +23,7 @@ def test_create_user_success():
 
 def test_create_user_invalid_data():
     response = client.post("/api/v1/users/", json=user_test_data["invalid_user"])
-    assert response.status_code == 422 or response.json()["code"] == 0
+    assert response.status_code == 422
 
 def test_user_login_success():
     # Ensure user exists
@@ -33,6 +33,9 @@ def test_user_login_success():
     assert response.json()["code"] == 1
     assert response.json()["status"].lower().startswith("success")
     assert "user_key" in response.json()
+    assert response.json()["user_key"] is not None
+    assert "authorization" in response.json()["user_key"]
+    assert response.json()["user_key"]["authorization"].startswith("Bearer ")
 
 def test_user_login_invalid_password():
     client.post("/api/v1/users/", json=user_test_data["valid_user"])
@@ -40,6 +43,7 @@ def test_user_login_invalid_password():
     assert response.status_code == 200
     assert response.json()["code"] == 0
     assert response.json()["status"].lower().startswith("failed")
+    assert response.json()["user_key"] is None
 
 def test_get_current_user_info():
     client.post("/api/v1/users/", json=user_test_data["valid_user"])
