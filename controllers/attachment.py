@@ -1,5 +1,6 @@
 from models import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from fastapi.responses import StreamingResponse
 from fastapi import UploadFile
 from serializers import RestCreateAttachmentResponse, RestGetAttachmentOfTransactionResponse, BaseRestResponse

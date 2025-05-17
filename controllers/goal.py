@@ -1,5 +1,6 @@
 from models import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from serializers import CreateGoal, UpdateGoal, RestCreateGoalResponse, RestGetGoalResponse, RestGetAllGoalsOfamilyResponse, BaseRestResponse
 
 async def get_all_goals_of_family(family_id: str, current_user: UserModel, db: AsyncSession)->RestGetAllGoalsOfamilyResponse:
