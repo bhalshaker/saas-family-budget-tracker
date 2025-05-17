@@ -5,6 +5,7 @@ from controllers import get_current_user
 from controllers import ControllerGetAllFamilyAccounts,ControllerCreateNewAccount,ControllerGetAccount,ControllerUpdateAccount,ControllerDeleteAccount
 from models import UserModel
 from serializers import RestGetAllAccountsOfamilyResponse, CreateAccount,UpdateAccount, RestCreateAccountResponse, BaseRestResponse
+from serializers import RestGetAccountResponse
 
 router = APIRouter()
 
@@ -25,7 +26,7 @@ async def create_new_account(family_id: str, new_account: CreateAccount, current
     return await ControllerCreateNewAccount(family_id, new_account, current_user, db)
 
 # Get a specific account
-@router.get("/api/v1/accounts/{account_id}", response_model=ControllerGetAccount,summary="Get a specific account",description="Get a specific account")
+@router.get("/api/v1/accounts/{account_id}", response_model=RestGetAccountResponse,summary="Get a specific account",description="Get a specific account")
 async def get_account(account_id: str, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """
     Get a specific account

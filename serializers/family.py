@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from serializers import BaseRestResponse,UserCreationResponse
+from .base import BaseRestResponse
+from .user import UserCreationResponse
 from uuid import UUID
 from typing import Optional,List
 
