@@ -22,5 +22,4 @@ class RestAddUserToFamilyResponse(BaseRestResponse):
     family_user_info: FamilyUserInfo
 
 class RestGetFamiliesUserBelongsToResponse(BaseRestResponse):
-    #families=Optional[List[FamilyInfo]] = None
-    family_users: Optional[List[FamilyUserInfo]] = None
+    families: Optional[List[FamilyInfo]] = None

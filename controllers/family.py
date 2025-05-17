@@ -1,6 +1,8 @@
 from serializers import RestFamilyCreationResponse, CreateFamily,CreatedFamily,UserCreationResponse,RestGetAllFamiliesResponse
 from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from uuid import UUID
 
 async def create_family(new_family: CreateFamily,current_user: UserModel,db: AsyncSession)->RestFamilyCreationResponse:
     """
@@ -36,7 +38,7 @@ async def get_all_families(db: AsyncSession)->RestGetAllFamiliesResponse:
         RestFamilyCreationResponse: The response object containing the status, message, and list of all families if successful.
     """
     try:
-        families = await db.execute(FamilyModel.select())
+        families = await db.execute(select(FamilyModel))
         families = families.scalars().all()
         families = [
             CreatedFamily(
@@ -69,7 +71,7 @@ async def get_family(family_id: str,current_user:UserModel,db: AsyncSession)->Re
         RestFamilyCreationResponse: The response object containing the status, message, and family details if successful.
     """
     try:
-        family = await db.execute(FamilyModel.select().where(FamilyModel.id == family_id))
+        family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
@@ -90,7 +92,7 @@ async def delete_family(family_id: str,current_user:UserModel,db: AsyncSession)-
         RestFamilyCreationResponse: The response object containing the status and message of the deletion operation.
     """
     try:
-        family = await db.execute(FamilyModel.select().where(FamilyModel.id == family_id))
+        family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
@@ -115,7 +117,7 @@ async def update_family(family_id: str,updated_family: CreateFamily,current_user
         RestFamilyCreationResponse: The response object containing the status, message, and updated family details if successful.
     """
     try:
-        family = await db.execute(FamilyModel.select().where(FamilyModel.id == family_id))
+        family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
@@ -128,3 +130,17 @@ async def update_family(family_id: str,updated_family: CreateFamily,current_user
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family updated successfully",family=CreatedFamily(**family.__dict__))
     except Exception as e:
         return RestFamilyCreationResponse(code=0,status="FAILED",message=f"Failed to update family: {str(e)}")
+
+# Get family by id
+async def get_family_by_id(family_id: str, db: AsyncSession) -> FamilyModel:
+    """
+    Asynchronously retrieves a family by its ID.
+    Args:
+        family_id (str): The ID of the family to retrieve.
+        db (AsyncSession): The asynchronous database session for performing database operations.
+    Returns:
+        FamilyModel: The family object if found, otherwise None.
+    """
+
+    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
+    return family.scalars().first() if family else None
