@@ -1,43 +1,38 @@
-import pytest
-from starlette.testclient import TestClient
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 import sys
 import os
+# Ensure the project root is in sys.path for module resolution
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import sessionmaker
 from main import app
 from database import get_db
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-
-
+# Use in-memory SQLite for testing
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 test_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
-def pytest_html_report_title(report):  
-    report.title = "Pytest HTML Report for SasS Family Budget Tracker FASTAPI application"
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return 'asyncio'
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def test_app():
     """
     Fixture that provides a TestClient instance for testing the FastAPI application.
-    Yields:
-        TestClient: An instance of TestClient initialized with the FastAPI app.
     """
+    return TestClient(app)
 
-    client = TestClient(app)
-    yield client
-
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 async def override_get_db():
     """
-    Asynchronous generator function that provides a database session for testing purposes.
+    Override get_db dependency to use the test SQLite database.
     Yields:
         AsyncSession: An instance of the test database session.
-    Commits the session if no exceptions occur; otherwise, rolls back the session and re-raises the exception.
-    Intended to be used as a dependency override in tests.
     """
-
     async with TestSessionLocal() as session:
         try:
             yield session
@@ -45,24 +40,24 @@ async def override_get_db():
         except:
             await session.rollback()
             raise
-@pytest.fixture(scope="module")
-async def override_recreate_db(Base):
-    """
-    Overrides the application's database dependency to recreate the database schema for testing.
-    This function drops all tables and recreates them using the provided SQLAlchemy Base metadata.
-    It is intended to be used as a fixture in tests to ensure a clean database state before each test run.
-    Args:
-        Base: The SQLAlchemy declarative base containing the metadata for the database schema.
-    Yields:
-        None. This is a generator function used for setup and teardown in test fixtures.
-    """
-        
-    async def _recreate():
-        async with test_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
-            return _recreate
-    app.dependency_overrides[get_db] = _recreate
+
+# Apply the override before each test
+@pytest.fixture(autouse=True, scope="function")
+def apply_db_override(override_get_db):
+    app.dependency_overrides[get_db] = lambda: override_get_db
     yield
     app.dependency_overrides = {}
 
+@pytest.fixture(scope="session", autouse=True)
+async def create_test_db():
+    """
+    Create the database schema for testing before any tests run.
+    """
+    from models.base import Base
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Optionally, drop tables after tests
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)

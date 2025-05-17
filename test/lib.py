@@ -30,7 +30,7 @@ def create_user(test_app: TestClient, name:str, email:str, password:str):
     if response.status_code != 200:
         raise Exception(f"User creation failed: {response.json().get('detail', 'Unknown error')}")
 
-    return response.json()
+    return response
 
 def create_family(test_app: TestClient, family_name:str, headers:dict):
     # Create a new family
