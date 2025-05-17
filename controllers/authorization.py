@@ -5,7 +5,7 @@ from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from uuid import UUID
 
 # Check if the user is a member of the family
-async def check_user_in_family(family_id: str, user_id: str, db: AsyncSession):
+async def check_user_in_family(family_id: str, user_id: UUID, db: AsyncSession):
     """
     Check if the user is a member of the family.
     Args:
@@ -26,11 +26,11 @@ async def check_user_in_family(family_id: str, user_id: str, db: AsyncSession):
         raise HTTPException(status_code=404, detail="Family not found")
 
     # Check if the user is a member of the family
-    if not any(user.id == UUID(user_id) for user in family.users):
+    if not any(user.id == user_id for user in family.users):
         raise HTTPException(status_code=403, detail="User is not a member of this family")
 
 # Check if the user is the owner of the family
-async def check_user_is_family_owner(family_id: str, user_id: str, db: AsyncSession):
+async def check_user_is_family_owner(family_id: str, user_id: UUID, db: AsyncSession):
     """
     Check if the user is the owner of the family.
     Args:
@@ -53,7 +53,7 @@ async def check_user_is_family_owner(family_id: str, user_id: str, db: AsyncSess
     # Check if the user is the owner of the family based on the family_user table
     family_user = await db.execute(FamilyUserModel.select().where(
         FamilyUserModel.family_id == UUID(family_id),
-        FamilyUserModel.user_id == UUID(user_id),
+        FamilyUserModel.user_id == user_id,
         FamilyUserModel.role == FamilyUserRole.OWNER
     ))
     family_user = family_user.scalars().first()
@@ -61,7 +61,7 @@ async def check_user_is_family_owner(family_id: str, user_id: str, db: AsyncSess
         raise HTTPException(status_code=403, detail="User is not the owner of this family")
     
 # Check if user has one of the ROLEs mentioned in the array based on the family_user table
-async def check_user_has_role(family_id: str, user_id: str, roles: list[FamilyUserRole], db: AsyncSession):
+async def check_user_has_role(family_id: str, user_id: UUID, roles: list[FamilyUserRole], db: AsyncSession):
     """
     Check if the user has one of the specified roles in the family.
     Args:
@@ -85,7 +85,7 @@ async def check_user_has_role(family_id: str, user_id: str, roles: list[FamilyUs
     # Check if the user has one of the specified roles in the family based on the family_user table
     family_user = await db.execute(FamilyUserModel.select().where(
         FamilyUserModel.family_id == UUID(family_id),
-        FamilyUserModel.user_id == UUID(user_id),
+        FamilyUserModel.user_id == user_id,
         FamilyUserModel.role.in_(roles)
     ))
     family_user = family_user.scalars().first()

@@ -20,7 +20,7 @@ async def get_all_users_in_family(family_id: str,current_user: UserModel, db: As
     """
 
     #Check if user id really belongs to a family
-    family = await db.execute(FamilyModel.select().where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         return RestGetAllUsersInFamilyResponse(code=0,status="FAILED", message="Family not found")
@@ -54,14 +54,14 @@ async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,curren
     #Check if the current user is the owner of the family
     await check_user_is_family_owner(family_id, current_user.id, db)
     #Check if the user to be added is already in the family
-    family = await db.execute(FamilyModel.select().where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         return BaseRestResponse(code=0, status="FAILED", message="Family not found")
     if any(user.id == user_addition.user_id for user in family.users):
         return BaseRestResponse(code=0, status="FAILED", message="User already in the family")
     #Check if the user to be added exists
-    user = await db.execute(UserModel.select().where(UserModel.id == UUID(user_addition.user_id)))
+    user = await db.execute(select(UserModel).where(UserModel.id == UUID(user_addition.user_id)))
     user = user.scalars().first()
     if not user:
         return BaseRestResponse(code=0, status="FAILED", message="User not found")
@@ -98,7 +98,7 @@ async def remove_user_from_family(family_id:str,user_id: str,current_user: UserM
     #check if the current user is the owner of the family
     await check_user_is_family_owner(family_id, current_user.id, db)
     #Remove the user from the family_user table if the user already exists and is not the owner
-    family_user = await db.execute(FamilyUserModel.select().where(FamilyUserModel.family_id == family_id, FamilyUserModel.user_id == UUID(user_id)))
+    family_user = await db.execute(select(FamilyUserModel).where(FamilyUserModel.family_id == family_id, FamilyUserModel.user_id == UUID(user_id)))
     family_user = family_user.scalars().first()
     if not family_user:
         return BaseRestResponse(code=0, status="FAILED", message="User not found in family")
