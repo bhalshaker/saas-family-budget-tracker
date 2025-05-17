@@ -84,7 +84,7 @@ async def update_user(user_id:str,updated_user:UserUpdate,current_user: UserMode
     Returns:
         The result of the ControllerUpdateUser function, which handles the update logic.
     """
-    print()
+    
     return await ControllerUpdateUser(user_id,updated_user,current_user,db)
 
 @router.delete(path="/api/v1/users/{user_id}",response_model=BaseRestResponse,summary="Delete a user",description="This services deletes users without transactions")
