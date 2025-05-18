@@ -1,4 +1,4 @@
-from serializers import RestFamilyCreationResponse, CreateFamily,CreatedFamily,UserCreationResponse,RestGetAllFamiliesResponse
+from serializers import RestFamilyCreationResponse, CreateFamily,RestGetAllFamiliesResponse
 from serializers import BaseRestResponse,FamilyInfo
 from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,21 +19,23 @@ async def create_family(new_family: CreateFamily,current_user: UserModel,db: Asy
     db_family = FamilyModel(**new_family.model_dump())
     db.add(db_family)
     try:
-        await db.commit()
-        await db.refresh(db_family)
-        print(db_family.__dict__)
+        # Flush to assign db_family.id before using it in FamilyUserModel
+        await db.flush()
         family_user=FamilyUserModel(user_id=current_user.id, family_id=db_family.id, role=FamilyUserRole.OWNER)
         db.add(family_user)
         await db.commit()
+        await db.refresh(db_family)
         await db.refresh(family_user)
+        print(db_family.__dict__)
         print(family_user.__dict__)
         created_family=FamilyInfo(**db_family.__dict__)
         print(created_family.__dict__)
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family created successfully",family=created_family)
-    except:
+    except Exception as e:
+        print("Family creation error:", e)
         await db.rollback()
-        return BaseRestResponse(code=0,status="FAILED",message="Failed to create a new family")
-    
+        return RestFamilyCreationResponse(code=0,status="FAILED",message="Failed to create a new family")
+
 async def get_all_families(db: AsyncSession)->RestGetAllFamiliesResponse:
     """
     Asynchronously retrieves all families from the database.
@@ -66,7 +68,7 @@ async def get_family(family_id: str,current_user:UserModel,db: AsyncSession)->Re
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
-        return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family retrieved successfully",family=CreatedFamily(**family.__dict__))
+        return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family retrieved successfully",family=FamilyInfo(**family.__dict__))
     except Exception as e:
         return RestFamilyCreationResponse(code=0,status="FAILED",message=f"Failed to retrieve family: {str(e)}")
 
@@ -86,6 +88,7 @@ async def delete_family(family_id: str,current_user:UserModel,db: AsyncSession)-
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
+        await db.flush()
         await db.delete(family)
         await db.commit()
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family deleted successfully")
@@ -109,13 +112,13 @@ async def update_family(family_id: str,updated_family: CreateFamily,current_user
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
-        if not any(family_user.user_id == current_user.id and family_user.role == FamilyUserRole.OWNER for family_user in family.users):
-            return RestFamilyCreationResponse(code=0,status="FAILED",message="User is not the owner of this family")
+        await check_user_is_family_owner(family_id, current_user.id, db)
+        await db.flush()
         for key, value in updated_family.model_dump().items():
             setattr(family, key, value)
         await db.commit()
         await db.refresh(family)
-        return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family updated successfully",family=CreatedFamily(**family.__dict__))
+        return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family updated successfully",family=FamilyInfo(**family.__dict__))
     except Exception as e:
         return RestFamilyCreationResponse(code=0,status="FAILED",message=f"Failed to update family: {str(e)}")
 

@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from .base import BaseRestResponse
-from .user import UserCreationResponse
 from uuid import UUID
 from typing import Optional,List
 
@@ -12,10 +11,10 @@ class FamilyInfo(BaseModel):
     name: str
     
 class RestFamilyCreationResponse(BaseRestResponse):
-    family: FamilyInfo
+    family: Optional[FamilyInfo]=None
 
 class RestGetAllFamiliesResponse(BaseRestResponse):
-    families: Optional[List[FamilyInfo]]
+    families: Optional[List[FamilyInfo]]=None
 
 class RestGetAllUsersInFamilyResponse(BaseRestResponse):
     family: Optional[FamilyInfo] = None
