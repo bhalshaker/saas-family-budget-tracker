@@ -150,3 +150,16 @@ async def get_family_by_id_with_account(family_id: str, db: AsyncSession) -> Fam
 
     family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.account)).where(FamilyModel.id == UUID(family_id)))
     return family.scalars().first() if family else None
+
+async def get_family_by_id_with_category(family_id: str, db: AsyncSession) -> FamilyModel:
+    """
+    Asynchronously retrieves a family by its ID.
+    Args:
+        family_id (str): The ID of the family to retrieve.
+        db (AsyncSession): The asynchronous database session for performing database operations.
+    Returns:
+        FamilyModel: The family object if found, otherwise None.
+    """
+
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.category)).where(FamilyModel.id == UUID(family_id)))
+    return family.scalars().first() if family else None

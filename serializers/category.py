@@ -20,10 +20,10 @@ class CreatedCategory(BaseModel):
     family_id: UUID
 
 class  RestCreateCategoryResponse(BaseRestResponse):
-    catregory: CreatedCategory
+    category: Optional[CreatedCategory]=None
 
 class RestGetCategoryResponse(BaseRestResponse):
-    category: CreatedCategory
+    category: Optional[CreatedCategory]=None
 
 class RestGetAllCategoriesOfamilyResponse(BaseRestResponse):
     categories: Optional[List[CreatedCategory]]=None
