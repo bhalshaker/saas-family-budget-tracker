@@ -27,23 +27,7 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 | PUT    | /families/{family_id}     | Update a family                   |
 | DELETE | /families/{family_id}     | Delete a family                   |
 
-### 👨‍👩‍👧‍👦 Family Users (Join Table)
-| Method | Route                                      | Description                          |
-|--------|--------------------------------------------|--------------------------------------|
-| GET    | /families/{family_id}/users                | List users in a family               |
-| POST   | /families/{family_id}/users                | Add a user to a family               |
-| DELETE | /families/{family_id}/users/{user_id}      | Remove a user from a family          |
-| GET    | /users/{user_id}/families    | Retrieve families a user belongs to       |
-
-### 👤 Users
-| Method | Route               | Description                    |
-|--------|---------------------|--------------------------------|
-| GET    | /users              | List all users                 |
-| POST   | /users              | Create a new user              |
-| GET    | /users/{user_id}    | Retrieve a specific user       |
-| PUT    | /users/{user_id}    | Update user details            |
-| DELETE | /users/{user_id}    | Delete a user                  |
-
+### 👨‍👩‍👧‍👦 Family Users (Join Table)List all attachments 
 ### 💼 Accounts
 | Method | Route                     | Description                 |
 |--------|---------------------------|-----------------------------|
@@ -74,7 +58,7 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 ### 📎 Attachments
 | Method | Route                          | Description                      |
 |--------|--------------------------------|----------------------------------|
-| GET    | /transactions/{transaction_id}/attachments                   | List all attachments             |
+| GET    | /transactions/{transaction_id}/attachments                   | Find the attachment related to the transaction |
 | POST   | /transactions/{transaction_id}/attachments                   | Upload a new attachment          |
 | GET    | /attachments/{attachment_id}   | Retrieve a specific attachment   |
 | DELETE | /attachments/{attachment_id}   | Delete an attachment             |
@@ -105,6 +89,14 @@ The following ERD outlines the data structure for the Multi-Family Budget Tracki
 | GET    | /budgettransactions/{budget_transaction_id}         | Get a specific mapping               |
 | DELETE | /budgettransactions/{budget_transaction_id}         | Remove a transaction from a budget   |
 
+## How to
+
+For detailed instructions on setting up and running the application, please refer to our [Getting Started Guide](howto/START_APP.md).
+
+For detailed instructions on setting up and running PostgreSQL in Docker for this application, please see our [PostgreSQL Docker Setup Guide](howto/INSTALL_PG_DOCKER.md).
+
+For detailed instructions on running tests with pytest, please refer to our [Pytest Testing Guide](howto/TEST_THROUGH_PYTEST.md).
+
 ## 📚 Libraries & Technologies Used
 
 This project leverages the following key libraries and technologies:
@@ -114,4 +106,8 @@ This project leverages the following key libraries and technologies:
 - **SQLAlchemy** — ORM for managing database models and queries
 - **PostgreSQL** — Relational database system
 - **JWT / OAuth** — Authentication and user session management
+- **Pytest and Pytest-HTML** - Python testing framework
 
+## Attributes
+
+ [pytest with Eric](https://pytest-with-eric.com/)https://pytest-with-eric.com/
