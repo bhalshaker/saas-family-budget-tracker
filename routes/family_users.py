@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from controllers import get_current_user
 from models import UserModel
-from serializers import RestGetAllUsersInFamilyResponse,RestAddUserToFamilyResponse,AddUserToFamily,BaseRestResponse
+from serializers import RestGetAllUsersInFamilyResponse,RestAddUserToFamilyResponse,AddUserToFamily,BaseRestResponse,RestGetFamiliesUserBelongsToResponse
 from controllers import ControllerGetAllUsersInFamily,ControllerAddUserToFamily,ControllerRemoveUserFromFamily,ControllerGetFamiliesUserBelongsTo
 
 router = APIRouter()
@@ -53,8 +53,8 @@ async def remove_user_from_family(family_id: str, user_id: str, current_user: Us
     return await ControllerRemoveUserFromFamily(family_id, user_id, current_user, db)
 
 # Get /api/v1/users/families to get all families a user belongs to
-@router.get(path="/api/v1/users/{user_id}/families", response_model=RestGetAllUsersInFamilyResponse, summary="Get all families a user belongs to", description="This service gets all families a user belongs to")
-async def get_families_user_belongs_to(user_id: str, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> RestGetAllUsersInFamilyResponse:
+@router.get(path="/api/v1/users/{user_id}/families", response_model=RestGetFamiliesUserBelongsToResponse, summary="Get all families a user belongs to", description="This service gets all families a user belongs to")
+async def get_families_user_belongs_to(user_id: str, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> RestGetFamiliesUserBelongsToResponse:
     """
     Asynchronously retrieves all families a specified user belongs to.
     Args:
