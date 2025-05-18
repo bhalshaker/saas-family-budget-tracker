@@ -133,7 +133,8 @@ async def update_user(user_id: str, updated_user: CreateUser,current_user: UserM
     if db_user.id != current_user.id:
         return RestUserCreationResponse(code=0,status="FAILED",message="Operation forbidden")
     for key, value in updated_user.model_dump(exclude_unset=True,exclude={'plain_password'}).items():
-        setattr(db_user, key, value)
+        if value is not None:
+            setattr(db_user, key, value)
     try:
         await db.commit()
         await db.refresh(db_user)

@@ -93,7 +93,6 @@ async def test_get_all_family_accounts_not_found():
         token = login_resp.json().get("user_key", {}).get("authorization")
         headers = {"Authorization": token} if token else {}
         response = await client.get(f"/api/v1/families/{account_test_data['garbage_uuid']}/accounts", headers=headers)
-        print(response.text)
         assert response.status_code == 404
         assert "NOT FOUND" in response.json()["detail"].upper()
 

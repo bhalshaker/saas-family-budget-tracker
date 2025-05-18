@@ -121,7 +121,8 @@ async def update_account(account_id: str,updated_account:UpdateAccount,current_u
     await check_user_is_family_owner(str(account.family_id), current_user.id, db)
     #Update account
     for key, value in updated_account.model_dump(exclude_unset=True).items():
-        setattr(account, key, value)
+        if value is not None:
+            setattr(account, key, value)
     try:
         await db.commit()
         await db.refresh(account)

@@ -60,7 +60,8 @@ async def update_goal(goal_id: str, updated_goal: UpdateGoal, current_user: User
         return BaseRestResponse(code=0, status="FAILED", message="Goal not found")
     # Update goal
     for key, value in updated_goal.model_dump().items():
-        setattr(goal, key, value)
+        if value is not None:
+            setattr(goal, key, value)
     db.add(goal)
     try:
         await db.commit()

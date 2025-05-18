@@ -25,9 +25,13 @@ async def get_all_budget_transactions_of_family(family_id: str, current_user: Us
     # Get family
     family = await get_family_by_id(family_id, db)
     if not family:
-        return BaseRestResponse(code=0, status="FAILED", message="Family not found")
+        return RestGetAllBudgetTransactionsOfamilyResponse(code=0, status="FAILED", message="Family not found")
+    # Get all budget transactions of the family
+    budget_transactions = await get_budget_transaction_by_family_id(family_id, db)
+    if not budget_transactions:
+        return RestGetAllBudgetTransactionsOfamilyResponse(code=0, status="FAILED", message="No budget transactions found for the family")
     # Return all budget transactions of the family from the family
-    return RestGetAllBudgetTransactionsOfamilyResponse(code=1, status="SUCCESS", message="Family budget transactions retrieved successfully", budget_transactions=[BudgetTransactionInfo(**budget_transaction) for budget_transaction in family.budget_transactions])
+    return RestGetAllBudgetTransactionsOfamilyResponse(code=1, status="SUCCESS", message="Family budget transactions retrieved successfully", budget_transactions=[BudgetTransactionInfo(**item.__dict__) for item in budget_transactions])
 
 async def add_budget_transaction_for_family(family_id: str, new_budget_transaction: CreateBudgetTransaction, current_user: UserModel, db: AsyncSession)-> RestCreateBudgetTransactionResponse:
     """
@@ -51,17 +55,17 @@ async def add_budget_transaction_for_family(family_id: str, new_budget_transacti
     # Get family
     family = await get_family_by_id(family_id, db)
     if not family:
-        return BaseRestResponse(code=0, status="FAILED", message="Family not found")
+        return RestCreateBudgetTransactionResponse(code=0, status="FAILED", message="Family not found")
     # Create new budget transaction
-    new_budget_transaction = BudgetTransactionModel(**new_budget_transaction.model_dump(), family_id=UUID(family.id), user_id=current_user.id)
+    new_budget_transaction = BudgetTransactionModel(**new_budget_transaction.model_dump(exclude={"entry_budget_id", "entry_transaction_id"}), family_id=family.id)
     db.add(new_budget_transaction)
     try:
         await db.commit()
         await db.refresh(new_budget_transaction)
-        return RestCreateBudgetTransactionResponse(code=1, status="SUCCESS", message="Budget transaction created successfully", budget_transaction=BudgetTransactionInfo(**new_budget_transaction.model_dump()))
+        return RestCreateBudgetTransactionResponse(code=1, status="SUCCESS", message="Budget transaction created successfully", budget_transaction=BudgetTransactionInfo(**new_budget_transaction.__dict__))
     except:
         await db.rollback()
-        return BaseRestResponse(code=0, status="FAILED", message="Failed to create budget transaction")
+        return RestCreateBudgetTransactionResponse(code=0, status="FAILED", message="Failed to create budget transaction")
 
 async def retrieve_budget_transaction(budget_transaction_id: str, current_user: UserModel, db: AsyncSession)->RestGetBudgetTransactionResponse:
     """
@@ -76,13 +80,14 @@ async def retrieve_budget_transaction(budget_transaction_id: str, current_user: 
         HTTPException: If the user is not a member of the family or if the budget transaction does not exist.
     """
 
-    # Check if the user is a member of the family
-    await check_user_in_family(budget_transaction_id, current_user.id, db)
     # Get budget transaction
     budget_transaction = await get_budget_transaction_by_id(budget_transaction_id, db)
     if not budget_transaction:
-        return BaseRestResponse(code=0, status="FAILED", message="Budget transaction not found")
-    return RestGetBudgetTransactionResponse(code=1, status="SUCCESS", message="Budget transaction retrieved successfully", budget_transaction=BudgetTransactionInfo(**budget_transaction.model_dump()))
+        return RestGetBudgetTransactionResponse(code=0, status="FAILED", message="Budget transaction not found")
+    # Check if the user is a member of the family
+    await check_user_in_family(str(budget_transaction.family_id), current_user.id, db)
+    
+    return RestGetBudgetTransactionResponse(code=1, status="SUCCESS", message="Budget transaction retrieved successfully", budget_transaction=BudgetTransactionInfo(**budget_transaction.__dict__))
 
 async def delete_budget_transaction(budget_transaction_id: str, current_user: UserModel, db: AsyncSession)->BaseRestResponse:
     """
@@ -99,13 +104,13 @@ async def delete_budget_transaction(budget_transaction_id: str, current_user: Us
     Raises:
         Exception: If the user is not the owner of the family, an exception may be raised by `check_user_is_family_owner`.
     """
-
-    # Check if the user is the owner member of the family
-    await check_user_is_family_owner(budget_transaction_id, current_user.id, db)
     # Get budget transaction
     budget_transaction = await get_budget_transaction_by_id(budget_transaction_id, db)
     if not budget_transaction:
         return BaseRestResponse(code=0, status="FAILED", message="Budget transaction not found")
+    # Check if the user is the owner member of the family
+    await check_user_is_family_owner(str(budget_transaction.family_id), current_user.id, db)
+    
     # Delete budget transaction
     await db.delete(budget_transaction)
     try:
@@ -126,3 +131,15 @@ async def get_budget_transaction_by_id(budget_transaction_id: str, db: AsyncSess
     """
     result = await db.execute(select(BudgetTransactionModel).where(BudgetTransactionModel.id == UUID(budget_transaction_id)))
     return result.scalars().first()
+
+async def get_budget_transaction_by_family_id(family_id: str, db: AsyncSession)->BudgetTransactionModel:
+    """
+    Retrieve a budget transaction by its family ID.
+    Args:
+        family_id (str): The unique identifier of the family.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        BudgetTransactionModel: The budget transaction object if found, None otherwise.
+    """
+    result = await db.execute(select(BudgetTransactionModel).where(BudgetTransactionModel.family_id == UUID(family_id)))
+    return result.scalars().all()

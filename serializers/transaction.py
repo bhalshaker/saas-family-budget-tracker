@@ -11,7 +11,7 @@ class CreateTransaction(BaseModel):
     amount: float
     date: datetime
     description: Optional[str] = None
-    type:EntryType
+    transaction_type:EntryType
 
 class UpdateTransaction(BaseModel):
     category_id: Optional[UUID] = None
@@ -19,7 +19,7 @@ class UpdateTransaction(BaseModel):
     amount: Optional[float] = None
     date: Optional[datetime] = None
     description: Optional[str] = None
-    type:Optional[EntryType] = None
+    transaction_type:Optional[EntryType] = None
 
 class TransactionInfo(BaseModel):
     id: UUID
@@ -30,13 +30,13 @@ class TransactionInfo(BaseModel):
     amount: float
     date: datetime
     description: Optional[str] = None
-    type:EntryType
+    transaction_type:EntryType
 
 class RestGetAllTransactionsOfamilyResponse(BaseRestResponse):
     transactions: Optional[List[TransactionInfo]]=None
 
 class RestCreatedTransactionResponse(BaseRestResponse):
-    transaction: TransactionInfo
+    transaction: Optional[TransactionInfo]=None
 
 class RestGetTransactionResponse(BaseRestResponse):
-    transaction: TransactionInfo
+    transaction: Optional[TransactionInfo]=None

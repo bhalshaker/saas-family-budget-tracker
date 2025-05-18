@@ -1,10 +1,12 @@
+from fastapi import HTTPException
 from models import UserModel,CategoryModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from serializers import CreateCategory, UpdateCategory, RestCreateCategoryResponse, RestGetCategoryResponse, RestGetAllCategoriesOfamilyResponse, BaseRestResponse
+from sqlalchemy.orm import selectinload
+from serializers import CreatedCategory,CreateCategory, UpdateCategory, RestCreateCategoryResponse, RestGetCategoryResponse, RestGetAllCategoriesOfamilyResponse, BaseRestResponse
 from uuid import UUID
 from .authorization import check_user_in_family,check_user_is_family_owner
-from .family import get_family_by_id
+from .family import get_family_by_id,get_family_by_id_with_category
 
 async def get_all_categories_of_family(family_id:str,current_user:UserModel,db:AsyncSession)->RestGetAllCategoriesOfamilyResponse:
     """
@@ -21,11 +23,11 @@ async def get_all_categories_of_family(family_id:str,current_user:UserModel,db:A
     # Check if the user is a member of the family
     await check_user_in_family(family_id, current_user.id, db)
     # Get family
-    family = await get_family_by_id(family_id, db)
+    family = await get_family_by_id_with_category(family_id, db)
     if not family:
-        return BaseRestResponse(code=0, status="FAILED", message="Family not found")
+        return RestGetAllCategoriesOfamilyResponse(code=0, status="FAILED", message="Family not found")
     # Return all categories of the family from the family
-    return RestGetAllCategoriesOfamilyResponse(code=1, status="SUCCESS", message="Family categories retrieved successfully", categories=[CategoryModel(**category) for category in family.categories])
+    return RestGetAllCategoriesOfamilyResponse(code=1, status="SUCCESS", message="Family categories retrieved successfully", categories=[CreatedCategory(**category.__dict__) for category in family.category])
 
 async def create_category_for_family(family_id:str,new_category:CreateCategory,current_user:UserModel,db:AsyncSession)-> RestCreateCategoryResponse:
     """
@@ -50,17 +52,17 @@ async def create_category_for_family(family_id:str,new_category:CreateCategory,c
     # Get family
     family = await get_family_by_id(family_id, db)
     if not family:
-        return BaseRestResponse(code=0, status="FAILED", message="Family not found")
+        return RestCreateCategoryResponse(code=0, status="FAILED", message="Family not found")
     # Create new category
-    new_category = CategoryModel(**new_category.model_dump(), family_id=UUID(family.id), user_id=current_user.id)
-    db.add(new_category)
+    db_category = CategoryModel(**new_category.model_dump(), family_id=family.id, user_id=current_user.id)
+    db.add(db_category)
     try:
         await db.commit()
-        await db.refresh(new_category)
-        return RestCreateCategoryResponse(code=1, status="SUCCESS", message="Category created successfully", category=CategoryModel(**new_category.model_dump()))
+        await db.refresh(db_category)
+        return RestCreateCategoryResponse(code=1, status="SUCCESS", message="Category created successfully", category=CreatedCategory(**db_category.__dict__))
     except:
         await db.rollback()
-        return BaseRestResponse(code=0, status="FAILED", message="Failed to create category")
+        return RestCreateCategoryResponse(code=0, status="FAILED", message="Failed to create category")
 
 async def retrieve_category(category_id:str,current_user:UserModel,db:AsyncSession)->RestGetCategoryResponse:
     """
@@ -76,12 +78,15 @@ async def retrieve_category(category_id:str,current_user:UserModel,db:AsyncSessi
     """
 
     # Check if the user is a member of the family
-    await check_user_in_family(category_id, current_user.id, db)
+    category = await get_category_by_id_with_family(category_id, db)
+    if not category:
+        return BaseRestResponse(code=0, status="FAILED", message="Category not found")
+    await check_user_in_family(str(category.family_id), current_user.id, db)
     # Get category
     category = await get_category_by_id(category_id, db)
     if not category:
-        return BaseRestResponse(code=0, status="FAILED", message="Category not found")
-    return RestGetCategoryResponse(code=1, status="SUCCESS", message="Category retrieved successfully", category=CategoryModel(**category.model_dump()))
+        return RestGetCategoryResponse(code=0, status="FAILED", message="Category not found")
+    return RestGetCategoryResponse(code=1, status="SUCCESS", message="Category retrieved successfully", category=CreatedCategory(**category.__dict__))
 
 async def update_category(category_id:str,updated_category:UpdateCategory,current_user:UserModel,db:AsyncSession)->RestCreateCategoryResponse:
     """
@@ -99,22 +104,22 @@ async def update_category(category_id:str,updated_category:UpdateCategory,curren
     """
 
     # Check if the user is the owner of the family
-    await check_user_is_family_owner(category_id, current_user.id, db)
-    # Get category
-    category = await get_category_by_id(category_id, db)
+    category = await get_category_by_id_with_family(category_id, db)
     if not category:
         return BaseRestResponse(code=0, status="FAILED", message="Category not found")
+    await check_user_is_family_owner(str(category.family_id), current_user.id, db)
     # Update category
     for key, value in updated_category.model_dump().items():
-        setattr(category, key, value)
+        if value is not None:
+            setattr(category, key, value)
     db.add(category)
     try:
         await db.commit()
         await db.refresh(category)
-        return RestCreateCategoryResponse(code=1, status="SUCCESS", message="Category updated successfully", category=CategoryModel(**category.model_dump()))
+        return RestCreateCategoryResponse(code=1, status="SUCCESS", message="Category updated successfully", category=CreatedCategory(**category.__dict__))
     except:
         await db.rollback()
-        return BaseRestResponse(code=0, status="FAILED", message="Failed to update category")
+        return RestCreateCategoryResponse(code=0, status="FAILED", message="Failed to update category")
 
 async def delete_category(category_id:str,current_user:UserModel,db:AsyncSession)->BaseRestResponse:
     """
@@ -132,11 +137,10 @@ async def delete_category(category_id:str,current_user:UserModel,db:AsyncSession
     """
 
     # Check if the user is the owner of the family
-    await check_user_is_family_owner(category_id, current_user.id, db)
-    # Get category
-    category = await get_category_by_id(category_id, db)
+    category = await get_category_by_id_with_family(category_id, db)
     if not category:
         return BaseRestResponse(code=0, status="FAILED", message="Category not found")
+    await check_user_is_family_owner(str(category.family_id), current_user.id, db)
     # Delete category
     await db.delete(category)
     try:
@@ -156,4 +160,16 @@ async def get_category_by_id(category_id:str,db:AsyncSession)->CategoryModel:
         CategoryModel: The category model if found, None otherwise.
     """
     category = await db.execute(select(CategoryModel).where(CategoryModel.id == UUID(category_id)))
+    return category.scalars().first()
+
+async def get_category_by_id_with_family(category_id:str,db:AsyncSession)->CategoryModel:
+    """
+    Get category by ID with family.
+    Args:
+        category_id (str): The unique identifier of the category.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        CategoryModel: The category model with family if found, None otherwise.
+    """
+    category= await db.execute(select(CategoryModel).options(selectinload(CategoryModel.family)).where(CategoryModel.id == UUID(category_id)))
     return category.scalars().first()

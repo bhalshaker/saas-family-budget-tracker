@@ -1,10 +1,11 @@
 from models import UserModel,TransactionModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from serializers import CreateTransaction, UpdateTransaction, RestCreatedTransactionResponse, RestGetTransactionResponse, RestGetAllTransactionsOfamilyResponse, BaseRestResponse
 from serializers import TransactionInfo
 from .authorization import check_user_in_family, check_user_is_family_owner
-from .family import get_family_by_id
+from .family import get_family_by_id,get_family_by_id_with_transactions
 from uuid import UUID
 
 async def get_all_transactions_of_family(family_id: str, current_user: UserModel, db: AsyncSession)->RestGetAllTransactionsOfamilyResponse:
@@ -26,11 +27,11 @@ async def get_all_transactions_of_family(family_id: str, current_user: UserModel
     # Check if the user is a member of the family
     await check_user_in_family(family_id, current_user.id, db)
     # Get family
-    family = await get_family_by_id(family_id, db)
+    family = await get_family_by_id_with_transactions(family_id, db)
     if not family:
         return BaseRestResponse(code=0, status="FAILED", message="Family not found")
     # Return all transactions of the family from the family
-    return RestGetAllTransactionsOfamilyResponse(code=1, status="SUCCESS", message="Family transactions retrieved successfully", transactions=[TransactionInfo(**transaction) for transaction in family.transactions])
+    return RestGetAllTransactionsOfamilyResponse(code=1, status="SUCCESS", message="Family transactions retrieved successfully", transactions=[TransactionInfo(**transaction.__dict__) for transaction in family.transaction])
 
 async def create_transaction_for_family(family_id: str, new_transaction: CreateTransaction, current_user: UserModel, db: AsyncSession)-> RestCreatedTransactionResponse:
     """
@@ -55,7 +56,7 @@ async def create_transaction_for_family(family_id: str, new_transaction: CreateT
     try:
         await db.commit()
         await db.refresh(new_transaction)
-        return RestCreatedTransactionResponse(code=1, status="SUCCESS", message="Transaction created successfully", transaction=TransactionInfo(**new_transaction.model_dump()))
+        return RestCreatedTransactionResponse(code=1, status="SUCCESS", message="Transaction created successfully", transaction=TransactionInfo(**new_transaction.__dict__))
     except Exception as e:
         await db.rollback()
         return BaseRestResponse(code=0, status="FAILED", message=f"Failed to create transaction: {str(e)}")
@@ -75,12 +76,11 @@ async def retrieve_transaction(transaction_id: str, current_user: UserModel, db:
     """
 
     # Check if the user is a member of the family
-    await check_user_in_family(transaction_id, current_user.id, db)
-    # Get transaction
     transaction = await get_transaction_by_id(transaction_id, db)
     if not transaction:
         return BaseRestResponse(code=0, status="FAILED", message="Transaction not found")
-    return RestGetTransactionResponse(code=1, status="SUCCESS", message="Transaction retrieved successfully", transaction=TransactionInfo(**transaction.model_dump()))
+    await check_user_in_family(str(transaction.family_id), current_user.id, db)
+    return RestGetTransactionResponse(code=1, status="SUCCESS", message="Transaction retrieved successfully", transaction=TransactionInfo(**transaction.__dict__))
 
 async def update_transaction(transaction_id: str, updated_transaction: UpdateTransaction, current_user: UserModel, db: AsyncSession)->RestCreatedTransactionResponse:
     """
@@ -103,18 +103,21 @@ async def update_transaction(transaction_id: str, updated_transaction: UpdateTra
     """
 
     # Check if the user is the owner of the family
-    await check_user_is_family_owner(transaction_id, current_user.id, db)
-    # Get transaction
     transaction = await get_transaction_by_id(transaction_id, db)
     if not transaction:
         return BaseRestResponse(code=0, status="FAILED", message="Transaction not found")
+    await check_user_is_family_owner(str(transaction.family_id), current_user.id, db)
+    print(transaction.__dict__)
     # Update transaction
     for key, value in updated_transaction.model_dump().items():
-        setattr(transaction, key, value)
+        if value is not None:
+            setattr(transaction, key, value)
+    print(transaction.__dict__)
     try:
+        await db.flush()
         await db.commit()
         await db.refresh(transaction)
-        return RestCreatedTransactionResponse(code=1, status="SUCCESS", message="Transaction updated successfully", transaction=TransactionInfo(**transaction.model_dump()))
+        return RestCreatedTransactionResponse(code=1, status="SUCCESS", message="Transaction updated successfully", transaction=TransactionInfo(**transaction.__dict__))
     except Exception as e:
         await db.rollback()
         return BaseRestResponse(code=0, status="FAILED", message=f"Failed to update transaction: {str(e)}")
@@ -135,11 +138,10 @@ async def delete_transaction(transaction_id: str, current_user: UserModel, db: A
     """
 
     # Check if the user is the owner of the family
-    await check_user_is_family_owner(transaction_id, current_user.id, db)
-    # Get transaction
     transaction = await get_transaction_by_id(transaction_id, db)
     if not transaction:
         return BaseRestResponse(code=0, status="FAILED", message="Transaction not found")
+    await check_user_is_family_owner(str(transaction.family_id), current_user.id, db)
     # Delete transaction
     await db.delete(transaction)
     try:
@@ -159,4 +161,28 @@ async def get_transaction_by_id(transaction_id: str, db: AsyncSession)->Transact
         TransactionModel: The transaction object if found, None otherwise.
     """
     result = await db.execute(select(TransactionModel).where(TransactionModel.id == UUID(transaction_id)))
+    return result.scalars().first()
+
+async def get_transaction_by_id_with_family(transaction_id: str, db: AsyncSession)->TransactionModel:
+    """
+    Retrieve a transaction by its ID.
+    Args:
+        transaction_id (str): The unique identifier of the transaction.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        TransactionModel: The transaction object if found, None otherwise.
+    """
+    result = await db.execute(select(TransactionModel).options(selectinload(TransactionModel.family)).where(TransactionModel.id == UUID(transaction_id)))
+    return result.scalars().first()
+
+async def get_transaction_by_id_with_attachment_family(transaction_id: str, db: AsyncSession)->TransactionModel:
+    """
+    Retrieve a transaction by its ID.
+    Args:
+        transaction_id (str): The unique identifier of the transaction.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        TransactionModel: The transaction object if found, None otherwise.
+    """
+    result = await db.execute(select(TransactionModel).options(selectinload(TransactionModel.attachment), selectinload(TransactionModel.family)).where(TransactionModel.id == UUID(transaction_id)))
     return result.scalars().first()
