@@ -2,6 +2,7 @@ from models import FamilyModel,UserModel,FamilyUserModel,FamilyUserRole
 from serializers import UserCreationResponse,FamilyInfo,RestGetAllUsersInFamilyResponse,AddUserToFamily,RestAddUserToFamilyResponse,BaseRestResponse,RestGetFamiliesUserBelongsToResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from .authorization import check_user_is_family_owner
 from uuid import UUID
 
@@ -20,17 +21,18 @@ async def get_all_users_in_family(family_id: str,current_user: UserModel, db: As
     """
 
     #Check if user id really belongs to a family
-    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         return RestGetAllUsersInFamilyResponse(code=0,status="FAILED", message="Family not found")
     #Check if usser in the familiy
-    if not any (user.id == current_user.id for user in family.users):
-        return RestGetAllUsersInFamilyResponse(code=0, status="UNAUTHORIZED",message="You are not a memeber of this family")
+    print(family.__dict__)
+    if not any (familyuser.user_id == current_user.id for familyuser in family.users):
+        return RestGetAllUsersInFamilyResponse(code=0, status="UNAUTHORIZED",message="You are not a member of this family")
     else:
         return RestGetAllUsersInFamilyResponse(code=1, status="SUCCESS", message="User is in the family",
-                                               family=FamilyInfo(**family.model_dmup()),
-                                               users=[UserCreationResponse(**user.__dict__) for user in family.users])
+                                               family=FamilyInfo(**family.__dict__),
+                                               users=[family_user.user_id for family_user in family.users])
 
 async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,current_user: UserModel,db: AsyncSession)->RestAddUserToFamilyResponse:
     """

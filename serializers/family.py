@@ -10,16 +10,13 @@ class CreateFamily(BaseModel):
 class FamilyInfo(BaseModel):
     id: UUID
     name: str
-
-class CreatedFamily(FamilyInfo):
-    owner: UserCreationResponse
     
 class RestFamilyCreationResponse(BaseRestResponse):
-    family: CreateFamily
+    family: FamilyInfo
 
 class RestGetAllFamiliesResponse(BaseRestResponse):
-    families: Optional[List[CreatedFamily]]
+    families: Optional[List[FamilyInfo]]
 
 class RestGetAllUsersInFamilyResponse(BaseRestResponse):
     family: Optional[FamilyInfo] = None
-    users: Optional[List[UserCreationResponse]] = None
+    users: Optional[List[UUID]] = None

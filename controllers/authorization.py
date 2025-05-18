@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
+from sqlalchemy.orm import selectinload
+from models import FamilyModel,FamilyUserRole
 from uuid import UUID
 
 # Check if the user is a member of the family
@@ -20,13 +21,13 @@ async def check_user_in_family(family_id: str, user_id: UUID, db: AsyncSession):
             - 403 FORBIDDEN if the user is not a member of the family.
     """
     # Check if the family exists
-    family = await db.execute(FamilyModel.select().where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         raise HTTPException(status_code=404, detail="Family not found")
 
     # Check if the user is a member of the family
-    if not any(user.id == user_id for user in family.users):
+    if not any(family_user.user_id == user_id for family_user in family.users):
         raise HTTPException(status_code=403, detail="User is not a member of this family")
 
 # Check if the user is the owner of the family
@@ -45,19 +46,13 @@ async def check_user_is_family_owner(family_id: str, user_id: UUID, db: AsyncSes
             - 403 FORBIDDEN if the user is not the owner of the family.
     """
     # Check if the family exists
-    family = await db.execute(FamilyModel.select().where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         raise HTTPException(status_code=404, detail="Family not found")
 
     # Check if the user is the owner of the family based on the family_user table
-    family_user = await db.execute(FamilyUserModel.select().where(
-        FamilyUserModel.family_id == UUID(family_id),
-        FamilyUserModel.user_id == user_id,
-        FamilyUserModel.role == FamilyUserRole.OWNER
-    ))
-    family_user = family_user.scalars().first()
-    if not family_user:
+    if not any(family_user.user_id == user_id and family_user.role==FamilyUserRole.OWNER for family_user in family.users):
         raise HTTPException(status_code=403, detail="User is not the owner of this family")
     
 # Check if user has one of the ROLEs mentioned in the array based on the family_user table
@@ -77,17 +72,11 @@ async def check_user_has_role(family_id: str, user_id: UUID, roles: list[FamilyU
             - 403 FORBIDDEN if the user does not have any of the specified roles in the family.
     """
     # Check if the family exists
-    family = await db.execute(FamilyModel.select().where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         raise HTTPException(status_code=404, detail="Family not found")
 
     # Check if the user has one of the specified roles in the family based on the family_user table
-    family_user = await db.execute(FamilyUserModel.select().where(
-        FamilyUserModel.family_id == UUID(family_id),
-        FamilyUserModel.user_id == user_id,
-        FamilyUserModel.role.in_(roles)
-    ))
-    family_user = family_user.scalars().first()
-    if not family_user:
+    if not any(family_user.user_id == user_id and family_user.role in roles for family_user in family.users):
         raise HTTPException(status_code=403, detail="User does not have any of the specified roles in this family")

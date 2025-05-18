@@ -1,8 +1,10 @@
 from serializers import RestFamilyCreationResponse, CreateFamily,CreatedFamily,UserCreationResponse,RestGetAllFamiliesResponse
+from serializers import BaseRestResponse,FamilyInfo
 from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from uuid import UUID
+from .authorization import check_user_is_family_owner,check_user_in_family
 
 async def create_family(new_family: CreateFamily,current_user: UserModel,db: AsyncSession)->RestFamilyCreationResponse:
     """
@@ -19,15 +21,18 @@ async def create_family(new_family: CreateFamily,current_user: UserModel,db: Asy
     try:
         await db.commit()
         await db.refresh(db_family)
-        family_user=FamilyUserModel(user_id=current_user.id,family_id=db_family.id,role=FamilyUserRole.OWNER)
+        print(db_family.__dict__)
+        family_user=FamilyUserModel(user_id=current_user.id, family_id=db_family.id, role=FamilyUserRole.OWNER)
         db.add(family_user)
         await db.commit()
         await db.refresh(family_user)
-        created_family=CreatedFamily(**db_family.__dict__,owner=UserCreationResponse(**current_user.__dict__))
+        print(family_user.__dict__)
+        created_family=FamilyInfo(**db_family.__dict__)
+        print(created_family.__dict__)
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family created successfully",family=created_family)
     except:
         await db.rollback()
-        return RestFamilyCreationResponse(code=0,status="FAILED",message="Failed to create a new family")
+        return BaseRestResponse(code=0,status="FAILED",message="Failed to create a new family")
     
 async def get_all_families(db: AsyncSession)->RestGetAllFamiliesResponse:
     """
@@ -40,22 +45,7 @@ async def get_all_families(db: AsyncSession)->RestGetAllFamiliesResponse:
     try:
         families = await db.execute(select(FamilyModel))
         families = families.scalars().all()
-        families = [
-            CreatedFamily(
-            **family.__dict__,
-            owner=UserCreationResponse(
-                **next(
-                (
-                    family_user.__dict__
-                    for family_user in family.users
-                    if family_user.role == FamilyUserRole.OWNER
-                ),
-                {}
-                )
-            )
-            )
-            for family in families
-        ]
+        families = [FamilyInfo(**family.__dict__)for family in families]
         return RestGetAllFamiliesResponse(code=1,status="SUCCESSFUL",message="Families retrieved successfully",families=families)
     except Exception as e:
         return RestGetAllFamiliesResponse(code=0,status="FAILED",message=f"Failed to retrieve families: {str(e)}")
@@ -71,12 +61,11 @@ async def get_family(family_id: str,current_user:UserModel,db: AsyncSession)->Re
         RestFamilyCreationResponse: The response object containing the status, message, and family details if successful.
     """
     try:
+        await check_user_in_family(family_id, current_user.id, db)
         family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
-        if not any(family_user.user_id == current_user.id for family_user in family.users):
-            return RestFamilyCreationResponse(code=0,status="FAILED",message="User is not a member of this family")
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family retrieved successfully",family=CreatedFamily(**family.__dict__))
     except Exception as e:
         return RestFamilyCreationResponse(code=0,status="FAILED",message=f"Failed to retrieve family: {str(e)}")
@@ -92,12 +81,11 @@ async def delete_family(family_id: str,current_user:UserModel,db: AsyncSession)-
         RestFamilyCreationResponse: The response object containing the status and message of the deletion operation.
     """
     try:
+        await check_user_is_family_owner(family_id, current_user.id, db)
         family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
         family = family.scalars().first()
         if not family:
             return RestFamilyCreationResponse(code=0,status="FAILED",message="Family not found")
-        if not any(family_user.user_id == current_user.id and family_user.role == FamilyUserRole.OWNER for family_user in family.users):
-            return RestFamilyCreationResponse(code=0, status="FAILED", message="User is not the owner of this family")
         await db.delete(family)
         await db.commit()
         return RestFamilyCreationResponse(code=1,status="SUCCESSFUL",message="Family deleted successfully")

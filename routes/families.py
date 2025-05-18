@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from serializers import RestFamilyCreationResponse,RestGetAllFamiliesResponse,CreateFamily
+from serializers import RestFamilyCreationResponse,RestGetAllFamiliesResponse,CreateFamily,BaseRestResponse
 from controllers import ControllerCreateFamily,ControllerGetFamily,ControllerGetAllFamilies,ControllerDeleteFamily,ControllerUpdateFamily
 from models import UserModel
 from controllers import get_current_user
