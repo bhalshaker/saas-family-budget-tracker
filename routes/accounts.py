@@ -18,7 +18,7 @@ async def get_all_family_accounts(family_id: str, current_user: UserModel = Depe
     return await ControllerGetAllFamilyAccounts(family_id, current_user, db)
 
 # Post a new account that belongs to a family
-@router.post("/api/v1/families//{family_id}/accounts", response_model=RestCreateAccountResponse,summary="Create a new account",description="Create a new account")
+@router.post("/api/v1/families/{family_id}/accounts", response_model=RestCreateAccountResponse,summary="Create a new account",description="Create a new account")
 async def create_new_account(family_id: str, new_account: CreateAccount, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """
     Create a new account

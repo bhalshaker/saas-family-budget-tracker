@@ -3,6 +3,7 @@ from serializers import BaseRestResponse,FamilyInfo
 from models import UserModel,FamilyModel,FamilyUserModel,FamilyUserRole
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from uuid import UUID
 from .authorization import check_user_is_family_owner,check_user_in_family
 
@@ -134,4 +135,18 @@ async def get_family_by_id(family_id: str, db: AsyncSession) -> FamilyModel:
     """
 
     family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
+    return family.scalars().first() if family else None
+
+# Get family by id
+async def get_family_by_id_with_account(family_id: str, db: AsyncSession) -> FamilyModel:
+    """
+    Asynchronously retrieves a family by its ID.
+    Args:
+        family_id (str): The ID of the family to retrieve.
+        db (AsyncSession): The asynchronous database session for performing database operations.
+    Returns:
+        FamilyModel: The family object if found, otherwise None.
+    """
+
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.account)).where(FamilyModel.id == UUID(family_id)))
     return family.scalars().first() if family else None

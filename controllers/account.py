@@ -2,9 +2,10 @@ from sqlalchemy.future import select
 from models import UserModel,AccountModel
 from serializers import CreateAccount,AccountInfo
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from serializers import RestCreateAccountResponse, RestGetAccountResponse, RestGetAllAccountsOfamilyResponse, BaseRestResponse,UpdateAccount
 from .authorization import check_user_in_family,check_user_is_family_owner
-from .family import get_family_by_id
+from .family import get_family_by_id_with_account
 from uuid import UUID
 
 async def get_all_family_accounts(family_id: str,current_user:UserModel,db:AsyncSession)->RestGetAllAccountsOfamilyResponse:
@@ -25,11 +26,11 @@ async def get_all_family_accounts(family_id: str,current_user:UserModel,db:Async
     #Check if the user is a member of the family
     await check_user_in_family(family_id, current_user.id, db)
     #Get family
-    family = await get_family_by_id(family_id, db)
+    family = await get_family_by_id_with_account(family_id, db)
     if not family:
         return BaseRestResponse(code=0,status="FAILED",message="Family not found")
     #Return all accounts of the family from the family
-    return RestGetAllAccountsOfamilyResponse(code=1,status="SUCCESS",message="Family accounts retrieved successfully",accounts=[AccountInfo(**account.__dict__) for account in family.accounts])
+    return RestGetAllAccountsOfamilyResponse(code=1,status="SUCCESS",message="Family accounts retrieved successfully",accounts=[AccountInfo(**account.__dict__) for account in family.account])
 
 async def create_new_account(family_id: str,new_account:CreateAccount, current_user: UserModel, db: AsyncSession)-> RestCreateAccountResponse:
     """
@@ -50,11 +51,12 @@ async def create_new_account(family_id: str,new_account:CreateAccount, current_u
     #Check if the user is the owner of the family
     await check_user_is_family_owner(family_id, current_user.id, db)
     #Check if the family exists
-    family = await get_family_by_id(family_id, db)
+    family = await get_family_by_id_with_account(family_id, db)
     if not family:
         return BaseRestResponse(code=0,status="FAILED",message="Family not found")
     #Create new account
-    db_account = AccountModel(**new_account.model_dump(),family_id=family.id)
+    db_account = AccountModel(**new_account.model_dump(),family_id=family.id,user_id=current_user.id)
+    print(db_account)
     db.add(db_account)
     try:
         await db.commit()
@@ -62,7 +64,7 @@ async def create_new_account(family_id: str,new_account:CreateAccount, current_u
         return RestCreateAccountResponse(code=1,status="SUCCESS",message="Account created successfully",account=AccountInfo(**db_account.__dict__))
     except Exception as e:
         await db.rollback()
-        return BaseRestResponse(code=0,status="FAILED",message=f"Failed to create account: {str(e)}")
+        return RestCreateAccountResponse(code=0,status="FAILED",message=f"Failed to create account: {str(e)}")
 
 async def delete_account(account_id: str,current_user: UserModel, db: AsyncSession)->BaseRestResponse:
     """
@@ -81,11 +83,10 @@ async def delete_account(account_id: str,current_user: UserModel, db: AsyncSessi
     """
 
     #Check if the user is the owner of the family
-    await check_user_is_family_owner(account_id, current_user.id, db)
-    #Check if the account exists
     account = await get_account_by_id(account_id, db)
     if not account:
         return BaseRestResponse(code=0,status="FAILED",message="Account not found")
+    await check_user_is_family_owner(str(account.family_id), current_user.id, db)
     #Delete account
     await db.delete(account)
     try:
@@ -114,11 +115,10 @@ async def update_account(account_id: str,updated_account:UpdateAccount,current_u
     """
 
     #Check if the user is the owner of the family
-    await check_user_is_family_owner(account_id, current_user.id, db)
-    #Check if the account exists
     account = await get_account_by_id(account_id, db)
     if not account:
         return BaseRestResponse(code=0,status="FAILED",message="Account not found")
+    await check_user_is_family_owner(str(account.family_id), current_user.id, db)
     #Update account
     for key, value in updated_account.model_dump(exclude_unset=True).items():
         setattr(account, key, value)
@@ -145,11 +145,10 @@ async def get_account(account_id: str,current_user: UserModel, db: AsyncSession)
     """
 
     #Check if the user is a member of the family
-    await check_user_in_family(account_id, current_user.id, db)
-    #Check if the account exists
     account = await get_account_by_id(account_id, db)
     if not account:
         return BaseRestResponse(code=0,status="FAILED",message="Account not found")
+    await check_user_in_family(str(account.family_id), current_user.id, db)
     #Return account
     return RestGetAccountResponse(code=1,status="SUCCESS",message="Account retrieved successfully",account=AccountInfo(**account.__dict__))
 
