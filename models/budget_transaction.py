@@ -7,6 +7,7 @@ class BudgetTransactionModel(BaseModel):
     Represents the association between a budget and a transaction in the system.
     Attributes:
         __tablename__ (str): The name of the database table for this model.
+        family_id (UUID): The unique identifier of the associated family.
         budget_id (UUID): The unique identifier of the associated budget. 
             Foreign key referencing the 'id' column in the 'budgets' table.
         transaction_id (UUID): The unique identifier of the associated transaction. 
@@ -20,6 +21,7 @@ class BudgetTransactionModel(BaseModel):
     """
 
     __tablename__ = "budgets_transactions"
+    family_id=Column(UUID(as_uuid=True), ForeignKey('families.id',deferrable=True), nullable=False)
     budget_id=Column(UUID(as_uuid=True), ForeignKey('budgets.id',deferrable=True), nullable=False)
     transaction_id=Column(UUID(as_uuid=True), ForeignKey('transactions.id',deferrable=True), nullable=False)
     assigned_amount=Column(Numeric(scale=3),nullable=False)
