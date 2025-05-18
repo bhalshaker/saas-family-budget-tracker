@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from .base import BaseRestResponse
-from .user import UserCreationResponse
 from uuid import UUID
 from typing import Optional,List
 
@@ -10,16 +9,13 @@ class CreateFamily(BaseModel):
 class FamilyInfo(BaseModel):
     id: UUID
     name: str
-
-class CreatedFamily(FamilyInfo):
-    owner: UserCreationResponse
     
 class RestFamilyCreationResponse(BaseRestResponse):
-    family: CreateFamily
+    family: Optional[FamilyInfo]=None
 
 class RestGetAllFamiliesResponse(BaseRestResponse):
-    families: Optional[List[CreatedFamily]]
+    families: Optional[List[FamilyInfo]]=None
 
 class RestGetAllUsersInFamilyResponse(BaseRestResponse):
     family: Optional[FamilyInfo] = None
-    users: Optional[List[UserCreationResponse]] = None
+    users: Optional[List[UUID]] = None

@@ -1,7 +1,8 @@
 from models import FamilyModel,UserModel,FamilyUserModel,FamilyUserRole
-from serializers import UserCreationResponse,FamilyInfo,RestGetAllUsersInFamilyResponse,AddUserToFamily,RestAddUserToFamilyResponse,BaseRestResponse,RestGetFamiliesUserBelongsToResponse
+from serializers import FamilyUserInfo,FamilyInfo,RestGetAllUsersInFamilyResponse,AddUserToFamily,RestAddUserToFamilyResponse,BaseRestResponse,RestGetFamiliesUserBelongsToResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from .authorization import check_user_is_family_owner
 from uuid import UUID
 
@@ -20,17 +21,18 @@ async def get_all_users_in_family(family_id: str,current_user: UserModel, db: As
     """
 
     #Check if user id really belongs to a family
-    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         return RestGetAllUsersInFamilyResponse(code=0,status="FAILED", message="Family not found")
     #Check if usser in the familiy
-    if not any (user.id == current_user.id for user in family.users):
-        return RestGetAllUsersInFamilyResponse(code=0, status="UNAUTHORIZED",message="You are not a memeber of this family")
+    print(family.__dict__)
+    if not any (familyuser.user_id == current_user.id for familyuser in family.users):
+        return RestGetAllUsersInFamilyResponse(code=0, status="UNAUTHORIZED",message="You are not a member of this family")
     else:
         return RestGetAllUsersInFamilyResponse(code=1, status="SUCCESS", message="User is in the family",
-                                               family=FamilyInfo(**family.model_dmup()),
-                                               users=[UserCreationResponse(**user.__dict__) for user in family.users])
+                                               family=FamilyInfo(**family.__dict__),
+                                               users=[family_user.user_id for family_user in family.users])
 
 async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,current_user: UserModel,db: AsyncSession)->RestAddUserToFamilyResponse:
     """
@@ -52,30 +54,32 @@ async def add_user_to_family(family_id:str,user_addition: AddUserToFamily,curren
     """
 
     #Check if the current user is the owner of the family
+    await db.flush()
     await check_user_is_family_owner(family_id, current_user.id, db)
     #Check if the user to be added is already in the family
-    family = await db.execute(select(FamilyModel).where(FamilyModel.id == UUID(family_id)))
+    family = await db.execute(select(FamilyModel).options(selectinload(FamilyModel.users)).where(FamilyModel.id == UUID(family_id)))
     family = family.scalars().first()
     if not family:
         return BaseRestResponse(code=0, status="FAILED", message="Family not found")
-    if any(user.id == user_addition.user_id for user in family.users):
+    if any(family_users.user_id == UUID(user_addition.user_id) for family_users in family.users):
         return BaseRestResponse(code=0, status="FAILED", message="User already in the family")
     #Check if the user to be added exists
     user = await db.execute(select(UserModel).where(UserModel.id == UUID(user_addition.user_id)))
     user = user.scalars().first()
     if not user:
         return BaseRestResponse(code=0, status="FAILED", message="User not found")
-    #Add the user to the family
-    family_user = FamilyUserModel(family_id=family_id, user_id=user_addition.user_id, role=user_addition.role)
+    family_user = FamilyUserModel(family_id=UUID(family_id), user_id=UUID(user_addition.user_id), role=user_addition.user_role)
+    await db.flush()
     db.add(family_user)
     try:
+        await db.flush()
         await db.commit()
         await db.refresh(family_user)
         return RestAddUserToFamilyResponse(code=1, status="SUCCESS", message="User added to family",
-                                       family=FamilyInfo(**family.model_dump()),
-                                       user=UserCreationResponse(**user.__dict__))
-    except:
-        return BaseRestResponse(code=0, status="FAILED", message="Failed to add user to family")
+                                       family_user_info=FamilyUserInfo(**family_user.__dict__))
+    except Exception as e:
+        print(e)
+        return RestAddUserToFamilyResponse(code=0, status="FAILED", message="Failed to add user to family")
 
 async def remove_user_from_family(family_id:str,user_id: str,current_user: UserModel,db: AsyncSession)->BaseRestResponse:
     """
@@ -98,7 +102,7 @@ async def remove_user_from_family(family_id:str,user_id: str,current_user: UserM
     #check if the current user is the owner of the family
     await check_user_is_family_owner(family_id, current_user.id, db)
     #Remove the user from the family_user table if the user already exists and is not the owner
-    family_user = await db.execute(select(FamilyUserModel).where(FamilyUserModel.family_id == family_id, FamilyUserModel.user_id == UUID(user_id)))
+    family_user = await db.execute(select(FamilyUserModel).where(FamilyUserModel.family_id == UUID(family_id), FamilyUserModel.user_id == UUID(user_id)))
     family_user = family_user.scalars().first()
     if not family_user:
         return BaseRestResponse(code=0, status="FAILED", message="User not found in family")
@@ -130,6 +134,9 @@ async def get_families_user_belongs_to(user_id:str,current_user: UserModel,db: A
     #check if the current user id is the same as the user id
     if current_user.id != UUID(user_id):
         return RestGetFamiliesUserBelongsToResponse(code=0, status="FAILED", message="You are not authorized to view this user's families")
+    user_with_families = await db.execute(select(UserModel).options(selectinload(UserModel.families)).where(UserModel.id == UUID(user_id)))
+    user_with_families = user_with_families.scalars().first()
+    print(user_with_families.__dict__)
     #Generate rest respone of all families the user belongs to based on current_user.families
     return RestGetFamiliesUserBelongsToResponse(code=1, status="SUCCESS", message="User belongs to the following families",
-                                                families=[FamilyInfo(**family.model_dump()) for family in current_user.families]) 
+                                                families=[family_user.family_id for family_user in user_with_families.families]) 

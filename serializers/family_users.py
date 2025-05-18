@@ -11,7 +11,7 @@ class FamilyUserInfo(BaseModel):
     id: UUID
     family_id: UUID
     user_id:UUID
-    user_role: FamilyUserRole
+    role: FamilyUserRole
     joined_at: datetime
 
 class AddUserToFamily(BaseModel):
@@ -19,7 +19,7 @@ class AddUserToFamily(BaseModel):
     user_role: FamilyUserRole
 
 class RestAddUserToFamilyResponse(BaseRestResponse):
-    family_user_info: FamilyUserInfo
+    family_user_info: Optional[FamilyUserInfo]=None
 
 class RestGetFamiliesUserBelongsToResponse(BaseRestResponse):
-    families: Optional[List[FamilyInfo]] = None
+    families: Optional[List[UUID]] = None
