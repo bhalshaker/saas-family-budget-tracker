@@ -174,3 +174,15 @@ async def get_transaction_by_id_with_family(transaction_id: str, db: AsyncSessio
     """
     result = await db.execute(select(TransactionModel).options(selectinload(TransactionModel.family)).where(TransactionModel.id == UUID(transaction_id)))
     return result.scalars().first()
+
+async def get_transaction_by_id_with_attachment_family(transaction_id: str, db: AsyncSession)->TransactionModel:
+    """
+    Retrieve a transaction by its ID.
+    Args:
+        transaction_id (str): The unique identifier of the transaction.
+        db (AsyncSession): The asynchronous database session.
+    Returns:
+        TransactionModel: The transaction object if found, None otherwise.
+    """
+    result = await db.execute(select(TransactionModel).options(selectinload(TransactionModel.attachment), selectinload(TransactionModel.family)).where(TransactionModel.id == UUID(transaction_id)))
+    return result.scalars().first()

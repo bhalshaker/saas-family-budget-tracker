@@ -10,7 +10,7 @@ class AttachmentInfo(BaseModel):
     upload_date:datetime
 
 class RestCreateAttachmentResponse(BaseRestResponse):
-    attachment: AttachmentInfo
+    attachment: Optional[AttachmentInfo]=None
 
 class RestGetAttachmentOfTransactionResponse(RestCreateAttachmentResponse):
-    attachtment: AttachmentInfo
+    attachtment: Optional[AttachmentInfo]=None
