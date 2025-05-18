@@ -10,8 +10,8 @@ router = APIRouter()
 
 # Get all transactions of a family
 @router.get("/api/v1/families/{family_id}/transactions")
-async def get_all_transactions_of_family(family_id:str, db: AsyncSession = Depends(get_db))->RestGetAllTransactionsOfamilyResponse:
-    return await ControllerGetAllTransactionsOfFamily(family_id=family_id, db=db)
+async def get_all_transactions_of_family(family_id:str, current_user:UserModel=Depends(get_current_user),db: AsyncSession = Depends(get_db))->RestGetAllTransactionsOfamilyResponse:
+    return await ControllerGetAllTransactionsOfFamily(family_id=family_id,current_user=current_user, db=db)
 
 # Create a new transaction for a family
 @router.post("/api/v1/families/{family_id}/transactions")

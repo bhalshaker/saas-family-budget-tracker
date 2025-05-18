@@ -110,7 +110,8 @@ async def update_category(category_id:str,updated_category:UpdateCategory,curren
     await check_user_is_family_owner(str(category.family_id), current_user.id, db)
     # Update category
     for key, value in updated_category.model_dump().items():
-        setattr(category, key, value)
+        if value is not None:
+            setattr(category, key, value)
     db.add(category)
     try:
         await db.commit()

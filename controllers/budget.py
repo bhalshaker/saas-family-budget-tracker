@@ -53,7 +53,8 @@ async def update_budget(budget_id: str, updated_budget: UpdateBudget, current_us
         return BaseRestResponse(code=0, status="FAILED", message="Budget not found")
     # Update budget
     for key, value in updated_budget.model_dump().items():
-        setattr(budget, key, value)
+        if value is not None:
+            setattr(budget, key, value)
     db.add(budget)
     try:
         await db.commit()
